@@ -22,7 +22,7 @@ score ("87% round") show you how you did, so you learn instead of just getting f
 - **Shapes**: stamp lines, circles, ovals, squares, rectangles, triangles, stars and arrows, as outline, fill or both.
 - **Fill bucket** that sees all your lines, closes small gaps, fills behind lines, and can fill solid, with the look of your brush, or as a fade.
 - **Hold still to pick a line**: hold the eraser on a line to delete it, hold a pen on a line to recolor it, or on an empty area to fill it.
-- **Move tool**: move, resize and turn any line or group of lines.
+- **Move tool**: move, resize, turn and flip any line or group of lines, and duplicate, copy and paste them (great for rows of buildings, trees, windows...).
 - **Layers** with Normal / Glow / Shade blending, a light-blue guide layer for sketch lines, and mirror mode.
 - **Zoom, pan, turn and flip** the page. Two-finger gestures on touch screens; palm rejection once you use a pen.
 - **Reference photo** in a see-through side window or traced under your drawing.
@@ -55,6 +55,7 @@ That's it. No install, no account, no internet needed after download. Chrome or 
 | I / F / V | Eyedropper / fill / move |
 | Ctrl+Z / Ctrl+Y | Undo / redo |
 | Ctrl+S | Save as PNG |
+| Ctrl+D / Ctrl+C / Ctrl+V | Duplicate / copy / paste the picked lines (Move tool) |
 | [ / ] | Smaller / bigger brush |
 | + / - / 0 | Zoom in / out / fit |
 | , / . | Turn the page |

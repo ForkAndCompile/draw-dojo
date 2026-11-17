@@ -297,3 +297,13 @@ small.muted { display: block; color: var(--muted); font-size: 11px; margin-top: 
 .panel-mini > :not(.lp-head) { display: none !important; }
 .panel-mini { padding-bottom: 10px; }
 #lessonPanel.dragging, .float-panel.dragging { opacity: .85; box-shadow: 0 16px 40px rgba(0,0,0,.6); }
+
+/* ---------- selection bar (Move tool) ---------- */
+.sel-bar {
+  position: absolute; top: 48px; left: 50%; transform: translateX(-50%); z-index: 15;
+  display: flex; gap: 4px; align-items: center; padding: 5px 6px 5px 12px; white-space: nowrap;
+  background: rgba(40, 43, 52, .96); border: 1px solid #4b6aa8; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.sel-bar[hidden] { display: none; }
+.sel-bar button { padding: 4px 10px; font-size: 12px; }
+.sel-info { color: var(--muted); font-size: 12px; margin-right: 6px; }

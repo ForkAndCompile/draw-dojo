@@ -228,6 +228,7 @@
     if (ctrl && k === 'z') { e.preventDefault(); e.shiftKey ? App.history.doRedo() : App.history.doUndo(); return; }
     if (ctrl && k === 'y') { e.preventDefault(); App.history.doRedo(); return; }
     if (ctrl && k === 's') { e.preventDefault(); App.save(); return; }
+    if (ctrl && (k === 'c' || k === 'v' || k === 'd') && App.Move.shortcut(k)) { e.preventDefault(); return; }
     if (ctrl || e.altKey) return;
     // view: + / - zoom, 0 fit, , and . turn the page, H flips the view
     if (k === '+' || k === '=') { App.zoomBy(1.25); return; }

@@ -12,14 +12,14 @@
 
   /* ---------- transform helpers ---------- */
   const T = () => sel.t;
-  function map(p) {   // apply the current move / resize / turn to a point
-    const { dx, dy, s, a } = T(), c = sel.c;
-    const x = (p.x - c.x) * s, y = (p.y - c.y) * s, cos = Math.cos(a), sin = Math.sin(a);
+  function map(p) {   // apply the current move / resize / turn / flip to a point
+    const { dx, dy, s, a, fx } = T(), c = sel.c;
+    const x = (p.x - c.x) * s * fx, y = (p.y - c.y) * s, cos = Math.cos(a), sin = Math.sin(a);
     return { x: c.x + x * cos - y * sin + dx, y: c.y + x * sin + y * cos + dy, p: p.p };
   }
   function applyCtx(ctx) {
-    const { dx, dy, s, a } = T(), c = sel.c;
-    ctx.translate(c.x + dx, c.y + dy); ctx.rotate(a); ctx.scale(s, s); ctx.translate(-c.x, -c.y);
+    const { dx, dy, s, a, fx } = T(), c = sel.c;
+    ctx.translate(c.x + dx, c.y + dy); ctx.rotate(a); ctx.scale(s * fx, s); ctx.translate(-c.x, -c.y);
   }
   function corners() {
     const b = sel.box;
@@ -55,14 +55,15 @@
 
   function select(layer, items) {
     const tok = App.beginEdit(layer);   // snapshot of the layer before anything moves
-    sel = { layer, items, tok, t: { dx: 0, dy: 0, s: 1, a: 0 }, order: layer.items.slice() };
+    sel = { layer, items, tok, t: { dx: 0, dy: 0, s: 1, a: 0, fx: 1 }, order: layer.items.slice() };
     let box = null;
     for (const it of items) box = union(box, it.rect);
     sel.box = box; sel.c = { x: (box.x0 + box.x1) / 2, y: (box.y0 + box.y1) / 2 };
     items.forEach(it => { it.hidden = true; });
     I.wipeReplay(layer, items);   // take them off the layer; they float on the preview canvas
     preview();
-    App.setHint(`<b>${items.length === 1 ? '1 thing' : items.length + ' things'} picked</b> · drag to move, corners to resize, round handle to turn · Enter to finish, Esc to cancel, Delete to remove`);
+    App.setHint(`<b>${items.length === 1 ? '1 thing' : items.length + ' things'} picked</b> · drag to move, corners to resize, round handle to turn · Ctrl+D duplicate · Enter to finish`);
+    refresh();
   }
 
   /* ---------- live preview while moving ---------- */
@@ -103,6 +104,7 @@
   Mv.commit = function () {
     if (!sel) return;
     const s = sel; sel = null;
+    setTimeout(refresh);
     App.strokeCtx.clearRect(0, 0, App.W, App.H);
     s.items.forEach(it => { it.hidden = false; });
     if (isIdentityOf(s)) { restoreSnap(s); return; }
@@ -121,7 +123,7 @@
     });
     App.requestOverlay();
   };
-  const isIdentityOf = s => { const t = s.t; return !t.dx && !t.dy && t.s === 1 && !t.a; };
+  const isIdentityOf = s => { const t = s.t; return !t.dx && !t.dy && t.s === 1 && !t.a && t.fx === 1; };
   function restoreSnap(s) {
     const c = s.layer.ctx;
     c.save(); c.globalCompositeOperation = 'copy'; c.drawImage(App.snap, 0, 0); c.restore();
@@ -131,6 +133,7 @@
   Mv.cancel = function () {
     if (!sel) return;
     const s = sel; sel = null;
+    setTimeout(refresh);
     s.items.forEach(it => { it.hidden = false; });
     App.strokeCtx.clearRect(0, 0, App.W, App.H);
     restoreSnap(s);
@@ -138,6 +141,7 @@
 
   function removeSelected() {
     const s = sel; sel = null;
+    setTimeout(refresh);
     App.strokeCtx.clearRect(0, 0, App.W, App.H);
     s.items.forEach(it => { it.hidden = false; it.alive = false; });
     let area = null; s.items.forEach(it => { area = union(area, it.rect); });
@@ -148,7 +152,7 @@
   Mv.hasSelection = () => !!sel;
 
   /* ---------- pen input (called by input.js) ---------- */
-  Mv.press = function (raw) {
+  Mv.press = function (raw, e) {
     if (st.tool !== 'move') return null;
     const u = App.viewPx(), hs = 12 * u;
     if (sel) {
@@ -167,7 +171,10 @@
         const d0 = Math.hypot(start.x - cen.x, start.y - cen.y) || 1;
         return { move(p) { T().s = Math.max(0.05, t0.s * Math.hypot(p.x - cen.x, p.y - cen.y) / d0); preview(); }, up() {} };
       }
-      if (inside(raw, corners())) return dragger(raw);
+      if (inside(raw, corners())) {
+        if (e && e.altKey) Mv.duplicate(true);   // Alt+drag: drag out a copy
+        return dragger(raw);
+      }
       Mv.commit();   // pressed outside: finish, then start a new pick below
     }
     const layer = App.active;
@@ -223,5 +230,79 @@
     c.restore();
   };
 
-  Mv.init = function () { /* nothing to set up; core.js finishes a selection before other edits */ };
+  /* ---------- duplicate, copy, paste, flip ---------- */
+  let clip = null, pasteN = 0, bar = null;
+  const shifted = (r, dx, dy) => ({ x0: r.x0 + dx, y0: r.y0 + dy, x1: r.x1 + dx, y1: r.y1 + dy });
+  /* A copy of an item, moved by (dx, dy). Fill pictures are never changed in place, so copies can share them. */
+  function cloneItem(it, dx = 0, dy = 0) {
+    if (it.kind === 'fill') return { kind: 'fill', canvas: it.canvas, x: it.x + dx, y: it.y + dy, opacity: it.opacity, rect: shifted(it.rect, dx, dy), alive: true };
+    return { kind: it.kind, o: { ...it.o }, rect: shifted(it.rect, dx, dy), alive: true,
+             strokes: it.strokes.map(pts => pts.map(p => ({ x: p.x + dx, y: p.y + dy, p: p.p }))) };
+  }
+  /* The picked things as they look right now (moved, resized, turned, flipped). */
+  const current = () => sel.items.map(it => cloneItem({ ...it, ...bake(it) }));
+
+  /* Put copies on a layer (one undo step) and pick them, ready to drag. */
+  function placeCopies(layer, items) {
+    const tok = App.beginEdit(layer);
+    let area = null;
+    for (const it of items) { I.renderItem(layer.ctx, it); layer.items.push(it); area = union(area, it.rect); }
+    App.endEdit(tok, area, { undo: () => items.forEach(i => { i.alive = false; }), redo: () => items.forEach(i => { i.alive = true; }) });
+    select(layer, items);
+  }
+  Mv.duplicate = function (inPlace) {
+    if (!sel) return false;
+    const copies = current(), layer = sel.layer, off = inPlace ? 0 : 24 * App.viewPx();
+    Mv.commit();
+    placeCopies(layer, copies.map(c => cloneItem(c, off, off)));
+    if (!inPlace) App.toast('Duplicated! Drag the copy where you want it. Ctrl+D again for more.');
+    return true;
+  };
+  Mv.copy = function () {
+    if (!sel) return false;
+    clip = current(); pasteN = 0; refresh();
+    App.toast(`Copied ${clip.length === 1 ? '1 thing' : clip.length + ' things'}. Paste with Ctrl+V, on any layer.`);
+    return true;
+  };
+  Mv.paste = function () {
+    if (!clip) return false;
+    Mv.commit();
+    if (st.tool !== 'move') App.setTool('move');
+    if (!App.active.visible) { App.toast('This layer is hidden'); return true; }
+    pasteN++;
+    const off = 24 * App.viewPx() * pasteN;   // each paste lands a little further, so copies don't hide each other
+    placeCopies(App.active, clip.map(c => cloneItem(c, off, off)));
+    return true;
+  };
+  Mv.flip = function () { if (!sel) return false; T().fx = -T().fx; preview(); return true; };
+  Mv.shortcut = k => (k === 'd' ? Mv.duplicate() : k === 'c' ? Mv.copy() : k === 'v' ? Mv.paste() : false);
+
+  /* The bar at the top of the page while the Move tool is in use. */
+  function refresh() {
+    if (!bar) return;
+    bar.hidden = !(st.tool === 'move' || sel);
+    bar.querySelector('.sel-info').textContent = sel ? (sel.items.length === 1 ? '1 picked' : sel.items.length + ' picked') : 'Press a line, or draw a loop around lines';
+    for (const b of bar.querySelectorAll('button')) b.disabled = b.dataset.act === 'paste' ? !clip : !sel;
+  }
+
+  Mv.init = function () {
+    bar = document.createElement('div');
+    bar.id = 'selBar'; bar.className = 'sel-bar'; bar.hidden = true;
+    bar.innerHTML = '<span class="sel-info"></span>' +
+      '<button data-act="dup" title="Duplicate (Ctrl+D). Tip: hold Alt and drag the selection to drag out a copy">⧉ Duplicate</button>' +
+      '<button data-act="copy" title="Copy (Ctrl+C)">Copy</button>' +
+      '<button data-act="paste" title="Paste (Ctrl+V). Works on any layer">Paste</button>' +
+      '<button data-act="flip" title="Flip left-right">⇋ Flip</button>' +
+      '<button data-act="del" title="Delete (Del)">Delete</button>' +
+      '<button data-act="done" class="primary" title="Finish (Enter)">Done</button>';
+    document.getElementById('stage').appendChild(bar);
+    bar.addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b || b.disabled) return;
+      ({ dup: () => Mv.duplicate(), copy: Mv.copy, paste: Mv.paste, flip: Mv.flip, del: () => { if (sel) removeSelected(); }, done: Mv.commit })[b.dataset.act]();
+    });
+    const setTool = App.setTool;
+    App.setTool = t => { setTool(t); refresh(); };
+    refresh();
+  };
 })();

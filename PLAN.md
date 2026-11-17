@@ -152,6 +152,7 @@ A web app (HTML, JavaScript and canvas) that runs in Chrome or Edge:
 | R | Mirror mode |
 | I | Eyedropper |
 | V | Move tool (Enter finish, Esc cancel, Delete remove, arrows nudge) |
+| Ctrl+D / Ctrl+C / Ctrl+V | Duplicate / copy / paste the picked lines (Alt+drag also drags out a copy) |
 | + / - / 0 | Zoom in / out / fit the page |
 | , / . | Turn the page left / right |
 | H | Flip the view |
