@@ -268,26 +268,36 @@
       if (k > 0) {
         const r = Math.max(10 * u, st.size * App.unit / 2 + 8 * u);
         c.save(); c.lineWidth = 3 * u; c.strokeStyle = tool === 'eraser' ? 'rgba(235,70,90,.85)' : 'rgba(91,157,255,.9)';
-        c.beginPath(); c.arc(smart.at.x, smart.at.y, r, -Math.PI / 2, -Math.PI / 2 + Math.min(1, k) * Math.PI * 2); c.stroke(); c.restore();
+        c.beginPath(); c.arc(smart.at.x, smart.at.y, r, -Math.PI / 2, -Math.PI / 2 + Math.min(1, k) * Math.PI * 2); App.haloStroke(c, 0.6); c.restore();
       }
     }
   }
 
+  /* The pointer. Every mark is drawn twice, a wide dark line with a thin white
+     line on top, so it shows on any color: white paper, neon, a night sky. */
   function drawCursor(c, u) {
-    const t = drawing ? tool : st.tool;
+    const t = drawing ? tool : st.tool, x = cursor.x, y = cursor.y;
+    const both = (path, w = 1.3) => {
+      c.lineWidth = (w + 2.4) * u; c.strokeStyle = 'rgba(0, 0, 0, .7)'; path(); c.stroke();
+      c.lineWidth = w * u; c.strokeStyle = '#fff'; path(); c.stroke();
+    };
     c.save();
-    c.lineWidth = 1 * u;
+    c.lineCap = 'round'; c.setLineDash([]);
     if (t === 'fill' || t === 'picker' || t === 'move' || t === 'shape') {
-      const r = 7 * u;
-      c.strokeStyle = '#000';
-      c.beginPath(); c.moveTo(cursor.x - r, cursor.y); c.lineTo(cursor.x + r, cursor.y);
-      c.moveTo(cursor.x, cursor.y - r); c.lineTo(cursor.x, cursor.y + r); c.stroke();
-      if (t === 'picker') { c.beginPath(); c.arc(cursor.x, cursor.y, r * 1.4, 0, Math.PI * 2); c.stroke(); }
+      const r = 10 * u, gap = 3 * u;   // crosshair with an open middle, so you see the exact spot
+      both(() => {
+        c.beginPath();
+        c.moveTo(x - r, y); c.lineTo(x - gap, y); c.moveTo(x + gap, y); c.lineTo(x + r, y);
+        c.moveTo(x, y - r); c.lineTo(x, y - gap); c.moveTo(x, y + gap); c.lineTo(x, y + r);
+      });
+      if (t === 'picker') both(() => { c.beginPath(); c.arc(x, y, r * 1.35, 0, Math.PI * 2); });
     } else {
-      const r = Math.max(2 * u, st.size * App.unit / 2);
-      c.strokeStyle = 'rgba(255,255,255,.9)'; c.beginPath(); c.arc(cursor.x, cursor.y, r + u, 0, Math.PI * 2); c.stroke();
-      c.strokeStyle = 'rgba(0,0,0,.65)'; c.beginPath(); c.arc(cursor.x, cursor.y, r, 0, Math.PI * 2); c.stroke();
-      if (held) { c.strokeStyle = 'rgba(80,200,140,.9)'; c.lineWidth = 2 * u; c.beginPath(); c.arc(cursor.x, cursor.y, r + 5 * u, 0, Math.PI * 2); c.stroke(); }
+      const r = Math.max(3 * u, st.size * App.unit / 2);
+      both(() => { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); }, 1.2);
+      // a small dot in the middle: exactly where the line starts
+      c.fillStyle = 'rgba(0, 0, 0, .7)'; c.beginPath(); c.arc(x, y, 2.3 * u, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y, 1.2 * u, 0, Math.PI * 2); c.fill();
+      if (held) { c.strokeStyle = 'rgba(80,200,140,.95)'; c.lineWidth = 2.5 * u; c.beginPath(); c.arc(x, y, r + 5 * u, 0, Math.PI * 2); App.haloStroke(c, 0.6); }
     }
     c.restore();
   }

@@ -259,6 +259,8 @@
     App.Move.init();
     App.Drills.init();
     App.Stamp.init();
+    App.makeFloating(document.getElementById('lessonPanel'), 'lesson');
+    App.makeFloating(document.getElementById('drillPanel'), 'practice');
     App.Project.init();   // brings back the last drawing (autosave)
     App.setTool('pen');
     App.setColor(st.color);

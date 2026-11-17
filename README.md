@@ -26,7 +26,7 @@ score ("87% round") show you how you did, so you learn instead of just getting f
 - **Layers** with Normal / Glow / Shade blending, a light-blue guide layer for sketch lines, and mirror mode.
 - **Zoom, pan, turn and flip** the page. Two-finger gestures on touch screens; palm rejection once you use a pen.
 - **Reference photo** in a see-through side window or traced under your drawing.
-- **23 lessons** that draw hints step by step, snap your lines into place and can set up the right brush, color and layer for you:
+- **23 lessons** that draw hints step by step, snap your lines into place and can set up the right brush, color and layer for you (drag the lesson panel anywhere, or shrink it with –):
   - Faces (circle method, turned head, box method, the eye), bodies, hands, animals, landscapes, perspective, basic forms
   - Advanced: **neon cityscapes** (sunset skyline, rainy neon street, sci-fi megastructure), **anime** (face, eyes, chibi), **comics** (page layout, inking)
 - **Practice drills** (circles, straight lines, ovals, curves, boxes) with a score for every try and your progress over time.
