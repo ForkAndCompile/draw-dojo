@@ -85,7 +85,7 @@ App.initDocument = function () {
   App.temp = App.makeCanvas();                  // scratch for rendering strokes
   App.tempCtx = App.temp.getContext('2d');
 
-  App.addLayer('Sketch', { silent: true });
+  App.addLayer('Drawing', { silent: true });
   App.addLayer('Guides', { guide: true, silent: true });
   App.setActive(App.layers[0]);
   App.fitPaper();
@@ -170,10 +170,25 @@ App.moveLayer = function (L, dir) {
 
 App.setActive = function (L) {
   if (App.Move && App.Move.hasSelection()) App.Move.commit();
+  if (L && L.guide) {   // Guides only shows the helper lines: drawing happens on the other layers
+    L = (App.active && !App.active.guide && App.layers.includes(App.active) ? App.active : null) ||
+        App.layers.slice().reverse().find(l => !l.guide && !l.temp) || App.addLayer('Drawing', { index: 0, silent: true });
+  }
   App.active = L; App.syncLayers();
 };
 
 App.guideLayer = function () { return App.layers.find(l => l.guide); };
+
+/* The light-blue layer for construction lines (lessons put their sketch lines here). */
+App.sketchLayer = function (create) {
+  let L = App.layers.find(l => l.blue && !l.temp);
+  if (!L && create) {
+    const g = App.guideLayer();
+    L = App.addLayer('Sketch lines', { index: g ? App.layers.indexOf(g) : App.layers.length });
+    L.blue = true;
+  }
+  return L;
+};
 
 /* Put the layer canvases into the page in order, with the live stroke
    canvas right above the active layer so it previews in the right place. */

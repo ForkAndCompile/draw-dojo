@@ -41,7 +41,7 @@
   function updateHint() {
     const L = App.active;
     let h = `<b>${(App.brushes[st.tool] && App.brushes[st.tool].name) || TOOL_NAMES[st.tool] || st.tool}</b> on <b>${L ? L.name : ''}</b>`;
-    if (L && L.guide) h += ' · guide lines are light blue and can be hidden with G';
+    if (L && L.blue) h += ' · sketch lines are light blue: hide this layer when you ink';
     App.setHint(h);
   }
 
@@ -108,10 +108,13 @@
       const th = document.createElement('canvas'); th.className = 'thumb'; th.width = 88; th.height = 60;
       L.thumb = th; drawThumb(L);
       const name = document.createElement('span'); name.className = 'name';
-      name.textContent = L.name + (L.guide ? ' (guide)' : '') + (L.blend === 'screen' ? ' · glow' : L.blend === 'multiply' ? ' · shade' : '');
+      name.textContent = L.name + (L.guide ? ' (helper lines)' : L.blue ? ' · blue' : '') + (L.blend === 'screen' ? ' · glow' : L.blend === 'multiply' ? ' · shade' : '');
       row.title = 'Click to draw on this layer, double-click to rename';
       row.append(eye, th, name);
-      row.onclick = () => App.setActive(L);
+      row.onclick = () => {
+        if (L.guide) { App.toast('Guides only shows the helper lines. You draw on the other layers. Its eye (or G) shows and hides them.'); return; }
+        App.setActive(L);
+      };
       row.ondblclick = () => { const n = prompt('Layer name', L.name); if (n) { L.name = n.trim() || L.name; renderLayers(); } };
       list.appendChild(row);
     });

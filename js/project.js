@@ -70,7 +70,7 @@
       if (L.temp) continue;   // e.g. the practice layer
       const items = [];
       for (const it of L.items) if (it.alive) items.push(await packItem(it));
-      layers.push({ name: L.name, visible: L.visible, opacity: L.opacity, blend: L.blend, guide: L.guide, img: await toBlob(L.canvas), items });
+      layers.push({ name: L.name, visible: L.visible, opacity: L.opacity, blend: L.blend, guide: L.guide, blue: !!L.blue, img: await toBlob(L.canvas), items });
     }
     return { app: 'drawassist', version: 1, W: App.W, H: App.H, unit: App.unit,
              active: Math.max(0, App.layers.filter(l => !l.temp).indexOf(App.active)),
@@ -86,9 +86,16 @@
       App.resizeDocument(data.W, data.H, data.unit);
       for (const l of data.layers) {
         const L = App.addLayer(l.name, { guide: l.guide, silent: true, index: App.layers.length });
-        L.visible = l.visible; L.opacity = l.opacity; L.blend = l.blend || 'normal';
+        L.visible = l.visible; L.opacity = l.opacity; L.blend = l.blend || 'normal'; L.blue = !!l.blue;
         if (l.img) L.ctx.drawImage(await P.loadImage(l.img), 0, 0);
         L.items = await Promise.all((l.items || []).map(unpackItem));
+      }
+      // Older drawings had your lines on the Guides layer: turn it into a normal
+      // light-blue Sketch lines layer, and add a fresh Guides layer for the helper lines.
+      const old = App.layers.find(l => l.guide);
+      if (old && old.items.some(i => i.alive)) {
+        old.guide = false; old.blue = true; old.name = 'Sketch lines';
+        App.addLayer('Guides', { guide: true, silent: true });
       }
       App.setActive(App.layers[data.active] || App.layers[0]);
       await App.Ref.restore(data.ref);
@@ -125,7 +132,7 @@
     if (App.Lesson.active) App.Lesson.stop();
     App.Drills.stop(); App.Move.cancel(); App.Ref.remove();
     App.resizeDocument(App.W, App.H, App.unit);
-    App.addLayer('Sketch', { silent: true });
+    App.addLayer('Drawing', { silent: true });
     App.addLayer('Guides', { guide: true, silent: true });
     App.setActive(App.layers[0]);
     App.resetView();

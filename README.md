@@ -23,7 +23,7 @@ score ("87% round") show you how you did, so you learn instead of just getting f
 - **Fill bucket** that sees all your lines, closes small gaps, fills behind lines, and can fill solid, with the look of your brush, or as a fade.
 - **Hold still to pick a line**: hold the eraser on a line to delete it, hold a pen on a line to recolor it, or on an empty area to fill it.
 - **Move tool**: move, resize, turn and flip any line or group of lines, and duplicate, copy and paste them (great for rows of buildings, trees, windows...).
-- **Layers** with Normal / Glow / Shade blending, a light-blue guide layer for sketch lines, and mirror mode.
+- **Layers** with Normal / Glow / Shade blending, a light-blue Sketch lines layer for construction lines, helper lines you can hide with G, and mirror mode.
 - **Zoom, pan, turn and flip** the page. Two-finger gestures on touch screens; palm rejection once you use a pen.
 - **Reference photo** in a see-through side window or traced under your drawing.
 - **23 lessons** that draw hints step by step, snap your lines into place and can set up the right brush, color and layer for you (drag the lesson panel anywhere, or shrink it with –):

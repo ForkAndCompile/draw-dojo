@@ -37,7 +37,7 @@
     name: 'Layered skyline at sunset', sub: 'Neon cityscapes · beginner friendly',
     desc: 'Pink sky, three rows of flat building shapes, fog, tiny lit windows and a glow. No drawing skills needed, just shapes and layers.',
     palette: ['#ff4f8b', '#ff9ab8', '#d77fd8', '#9a63d8', '#5d3fa6', '#2a1f5c', '#ffd27a', '#fff3d6'],
-    noInk: true, doneToast: 'Beautiful! Press G to hide the guides, then Save. Try a blue night version next.',
+    noInk: true, doneToast: 'Beautiful! Press G to hide the helper lines, then Save. Try a blue night version next.',
     frame: (W, H) => ({ W, H }),
     steps: [
       { text: '<b>Sky, part 1.</b> Drag a rectangle over the <b>whole page</b>, starting at the <b>bottom</b>. The pink fades out toward the top.',
@@ -47,7 +47,7 @@
       { text: '<b>Sky, part 2.</b> Now the same with <b>purple</b>, starting at the <b>top</b>.',
         use: rectAll('Sky', '#6a3fb0', true, { say: 'Drag from a top corner to the opposite bottom corner.' }),
         expect: 'none', hintOnce: true, hint: (g, A) => dragHint(g, A, false) },
-      { text: '<b>Far buildings.</b> Stamp tall rectangles side by side along the guide line. Mix tall and short, wide and thin.',
+      { text: '<b>Far buildings.</b> Stamp tall rectangles side by side along the orange helper line. Mix tall and short, wide and thin.',
         tip: 'Far things are light and blend into the sky. That is what makes it look deep.',
         use: rectAll('Far city', '#d77fd8', false, { say: 'Drag rectangles up from the bottom.' }),
         expect: 'none', hint: (g, A) => g.poly(skyline(A, 7, A.H * 0.82, 0.25, 0.5, 0.05, 0.12)) },
@@ -71,14 +71,14 @@
         tip: 'Glow layers brighten what is under them. Big soft brush, light touch.',
         use: { layer: 'Glow', blend: 'screen', opacity: 0.9, tool: 'airbrush', size: 160, color: '#ff4f8b', say: 'Spray gently along the skyline.' },
         expect: 'none', hint: (g, A) => g.ellipse(A.W / 2, A.H * 0.62, A.W * 0.45, A.H * 0.12) },
-      finishStep('<b>Done!</b> Press <b>G</b> to hide the guides and Save your picture.', 'Next time: change the colors. Blue sky + yellow windows = night city.')
+      finishStep('<b>Done!</b> Press <b>G</b> to hide the helper lines and Save your picture.', 'Next time: change the colors. Blue sky + yellow windows = night city.')
     ]
   };
 
   /* ---------- 2. Rainy neon night ---------- */
   const horizonStep = {
-    text: 'On the guide layer, draw the <b>horizon line</b> straight across, a bit below the middle.',
-    tip: 'It snaps straight. This is a guide line: it hides with G at the end. The red dot will be your vanishing point.',
+    text: 'Draw the <b>horizon line</b> straight across, a bit below the middle. It is a sketch line, only there to find the vanishing point.',
+    tip: 'It snaps straight and goes on the light-blue Sketch lines layer. The red dot will be your vanishing point.',
     use: { guide: true, tool: 'pen', size: 3, say: 'Draw one line across the page.' },
     expect: 'line',
     hint: (g, A) => g.line(0, A.hy, A.W, A.hy),
@@ -87,7 +87,8 @@
   };
   const streetStep = {
     text: 'Draw the two <b>edges of the street</b>, from the bottom corners to the red dot.',
-    use: { guide: true, tool: 'pen', size: 3 },
+    tip: 'These are part of the picture, so they get their own Road layer.',
+    use: { layer: 'Road', tool: 'pen', size: 4, color: '#2f5d7c', say: 'Draw from a bottom corner toward the red dot.' },
     expect: 'line',
     hint: (g, A) => { g.dot(A.vp.x, A.vp.y); g.line(A.W * 0.1, A.H, A.vp.x, A.vp.y).line(A.W * 0.9, A.H, A.vp.x, A.vp.y); },
     snap: (res, A) => snap.vp(res, [A.vp], 9)
@@ -125,7 +126,7 @@
     name: 'Rainy neon night', sub: 'Neon cityscapes · street scene',
     desc: 'A street going into the distance, tall dark buildings, glowing signs, wet reflections and rain.',
     palette: ['#0b1026', '#1b2a4a', '#2f5d7c', '#3fd0e0', '#ff3d8b', '#b26bff', '#ffd166', '#e8f1ff'],
-    noInk: true, doneToast: 'Moody! Press G to hide the guides and Save.',
+    noInk: true, doneToast: 'Moody! Press G to hide the helper lines and Save.',
     frame: (W, H) => ({ W, H, hy: H * 0.6, vp: { x: W / 2, y: H * 0.6 } }),
     steps: [
       { text: '<b>Night sky.</b> Cover the whole page with a dark navy rectangle.',
@@ -137,7 +138,7 @@
       horizonStep,
       streetStep,
       { text: '<b>Buildings.</b> Tall dark rectangles on both sides. The closer to the red dot, the smaller they get.',
-        use: rectAll('Buildings', '#1b2a4a', false, { say: 'Stamp rectangles along the guides.' }),
+        use: rectAll('Buildings', '#1b2a4a', false, { say: 'Stamp rectangles along the orange helper lines.' }),
         expect: 'none', hint: (g, A) => { g.dot(A.vp.x, A.vp.y); sideBuildings(g, A); } },
       { text: '<b>Fog.</b> A teal fade from the street upward, over the bottom of the buildings.',
         use: rectAll('Fog', '#2f5d7c', true, { above: 'Buildings', opacity: 0.6, say: 'Drag from the bottom edge up to the horizon.' }),
@@ -155,7 +156,7 @@
       { text: '<b>Glow.</b> Soft pink and cyan glow around the signs and along the horizon.',
         use: { layer: 'Glow', blend: 'screen', opacity: 0.9, tool: 'airbrush', size: 120, color: '#3fd0e0', say: 'Spray softly around the lights.' },
         expect: 'none' },
-      finishStep('<b>Done!</b> Press <b>G</b> to hide the guides and Save.', 'Try the same street in purple and yellow.')
+      finishStep('<b>Done!</b> Press <b>G</b> to hide the helper lines and Save.', 'Try the same street in purple and yellow.')
     ]
   };
 
@@ -164,7 +165,7 @@
     name: 'Sci-fi megastructure', sub: 'Neon cityscapes · epic scale',
     desc: 'A giant tower in the fog, street lamps shrinking into the distance and flying ships. Scale is everything.',
     palette: ['#0d1b24', '#173543', '#2c6372', '#5fb7c4', '#8ff3ff', '#ffb000', '#e9fbff'],
-    noInk: true, doneToast: 'Epic! Press G to hide the guides and Save.',
+    noInk: true, doneToast: 'Epic! Press G to hide the helper lines and Save.',
     frame: (W, H) => ({ W, H, hy: H * 0.66, vp: { x: W / 2, y: H * 0.66 } }),
     steps: [
       { text: '<b>Sky.</b> Fill the page with dark teal, then a lighter teal fade from the bottom.',
@@ -199,7 +200,7 @@
         use: rectAll('Fog', '#5fb7c4', true, { above: 'Tower', opacity: 0.55 }), expect: 'none' },
       figureStep,
       rainStep,
-      finishStep('<b>Done!</b> Press <b>G</b> to hide the guides and Save.', 'Try a warm orange sky with the same shapes.')
+      finishStep('<b>Done!</b> Press <b>G</b> to hide the helper lines and Save.', 'Try a warm orange sky with the same shapes.')
     ]
   };
 })();

@@ -39,7 +39,7 @@
     $('learnTitle').textContent = 'What do you want to draw?';
     const body = $('learnBody'); body.innerHTML = '';
     const lead = document.createElement('p'); lead.className = 'lead';
-    lead.textContent = 'Pick a subject, then a method. Each lesson draws step by step on the light-blue guide layer.';
+    lead.textContent = 'Pick a subject, then a method. Orange helper lines show where to draw; your sketch lines go on a light-blue Sketch lines layer.';
     const lab = document.createElement('div'); lab.className = 'sub'; lab.textContent = 'How much help do you want?';
     const cards = document.createElement('div'); cards.className = 'cards';
     M.subjects.filter(s => !s.advanced).forEach(s => cards.appendChild(card(s.em, s.name, s.desc, () => showMethods(s), s.soon)));
@@ -71,18 +71,18 @@
     if (st.size > 12) st.size = 4;
     App.syncControls();
 
-    let g = App.guideLayer();
-    if (!g) g = App.addLayer('Guides', { guide: true });
-    g.visible = true;
-    if (g.ctx.getImageData(0, 0, App.W, App.H).data.some(v => v)) {
-      App.clearLayer(g);
-      App.toast('Guide layer cleared for the lesson (Ctrl+Z brings it back)');
+    if (!App.guideLayer()) App.addLayer('Guides', { guide: true });
+    App.setGuidesVisible(true);
+    const sk = App.sketchLayer(true);   // construction lines go here, in light blue
+    sk.visible = true;
+    if (sk.items.some(i => i.alive)) {
+      App.clearLayer(sk);
+      App.toast('Sketch lines from last time were cleared for the lesson (Ctrl+Z brings them back)');
     }
-    App.setActive(g);
+    App.setActive(sk);
     if (!App.isPaintTool(st.tool)) App.setTool('pen');
 
     L.method = m; L.active = id;
-    L.showHints = true; $('lpHints').classList.add('on');
     L.A = m.frame(App.W, App.H);
     $('lpTitle').textContent = `${m.name} · ${m.sub.split('·')[0].trim()}`;
     $('lessonPanel').hidden = false;
@@ -140,14 +140,14 @@
       if (u.size) parts.push('size ' + u.size);
       if (u.fill) parts.push(u.fill + ' fill');
       if (u.layer) parts.push('layer "' + u.layer + '"' + (u.blend === 'screen' ? ' (glow)' : u.blend === 'multiply' ? ' (shade)' : ''));
-      if (u.guide) parts.push('guide layer (sketch lines, hide with G)');
+      if (u.guide) parts.push('layer "Sketch lines" (light blue, hide it at the end)');
       use.innerHTML = (u.color ? `<i style="background:${u.color}"></i>` : '') + 'Set up for me: ' + parts.join(' · ');
       use.onclick = () => applyUse(u);
     }
   }
   function applyUse(u) {
     if (u.layer) {
-      let Ly = App.layers.find(l => l.name === u.layer && !l.guide);
+      let Ly = App.layers.find(l => l.name === u.layer && !l.guide && !l.temp);
       if (!Ly) {
         const g = App.guideLayer(), top = g ? App.layers.indexOf(g) : App.layers.length;
         const above = u.above ? App.layers.findIndex(l => l.name === u.above) : -1;
@@ -156,9 +156,10 @@
       if (u.blend) Ly.blend = u.blend;
       if (u.opacity != null) Ly.opacity = u.opacity;
       App.setActive(Ly);
-    } else if (u.guide && App.guideLayer()) {
-      if (!App.guideLayer().visible) App.setGuidesVisible(true);
-      App.setActive(App.guideLayer());
+    } else if (u.guide) {
+      const sk = App.sketchLayer(true);
+      sk.visible = true;
+      App.setActive(sk);
     }
     if (u.fill) App.settings.fillStyle = u.fill;
     if (u.shape) { App.settings.shape = u.shape; if (u.shapeMode) App.settings.shapeMode = u.shapeMode; }
@@ -178,7 +179,7 @@
 
   function onStroke(ev) {
     const s = step();
-    if (!s || !ev.layer || !ev.layer.guide) return;
+    if (!s || !ev.layer || ev.layer.temp) return;
     const res = ev.res, status = $('lpStatus');
     if (s.expect === 'none') return;
     if (res && res.type !== 'free' && fits(s.expect, res.type)) {
@@ -199,12 +200,12 @@
   /* Hooks used by the stroke pipeline (input.js). */
   L.snap = function (res) {
     const s = step();
-    if (!s || !s.snap || !App.active || !App.active.guide) return null;
+    if (!s || !s.snap || !App.active || App.active.temp) return null;   // snapping works on any layer
     return s.snap(res, L.A);
   };
   L.drawHints = function (ctx) {
     const s = step();
-    if (!s || L.showHints === false) return;
+    if (!s) return;
     ctx.save();
     const g = M.makeG(ctx, App.viewPx());
     // earlier steps stay visible as faint blue guides, so you never lose your place
@@ -221,16 +222,13 @@
     $('learnClose').onclick = L.closePicker;
     $('learnModal').addEventListener('pointerdown', e => { if (e.target.id === 'learnModal') L.closePicker(); });
     $('lpExit').onclick = L.stop;
-    $('lpHints').onclick = () => {
-      L.showHints = L.showHints === false;
-      $('lpHints').classList.toggle('on', L.showHints);
-      App.toast(L.showHints ? 'Lesson hints shown' : 'Lesson hints hidden. Everything you drew stays.');
-      App.requestOverlay();
-    };
+    // Hints = the Guides layer: helper lines only, your own lines always stay
+    $('lpHints').onclick = () => { const g = App.guideLayer(); if (g) App.setGuidesVisible(!g.visible); };
+    App.on('layers', () => { const g = App.guideLayer(); $('lpHints').classList.toggle('on', !g || g.visible); });
     $('lpBack').onclick = () => go(L.i - 1);
     $('lpNext').onclick = () => (step().finish ? finish() : go(L.i + 1));
     $('lpRedo').onclick = () => {
-      const g = App.guideLayer(); if (g) App.clearLayer(g);
+      const sk = App.sketchLayer(false); if (sk) App.clearLayer(sk);
       L.A = L.method.frame(App.W, App.H); go(0);
     };
     App.on('stroke', onStroke);

@@ -70,7 +70,7 @@
   }
 
   function opts(layer) {
-    return { brush: App.lastPaintTool(), color: layer.guide ? st.guideColor : st.color,
+    return { brush: App.lastPaintTool(), color: layer.blue || layer.guide ? st.guideColor : st.color,
              size: st.size * App.unit, opacity: st.opacity, pressure: true };
   }
   const wantsFill = g => g.closed && st.shapeMode !== 'outline';

@@ -173,7 +173,7 @@
   const colorOf = it => (it.kind === 'stroke' ? it.o.color : null);
 
   I.holdAction = function (tool, layer, x, y) {
-    const color = layer.guide ? App.settings.guideColor : App.settings.color;
+    const color = layer.blue || layer.guide ? App.settings.guideColor : App.settings.color;
     if (tool === 'eraser') {
       const it = I.hit(layer, x, y);
       if (!it) { App.toast('Nothing to delete here. Hold right on a line.'); return; }

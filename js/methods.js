@@ -221,7 +221,7 @@ M.list['face-circle'] = {
         const { cx, cy, r } = A;
         for (const s of [-1, 1]) g.curve([[cx + s * r * 0.95, cy], [cx + s * r * 1.18, cy - r * 0.05], [cx + s * r * 1.15, cy + r * 0.6], [cx + s * r * 0.92, cy + r]]);
       } },
-    { text: '<b>Done!</b> Press <b>Finish</b>: you get a new "Ink" layer. Draw your clean lines over the guides, then press <b>G</b> to hide the guides.',
+    { text: '<b>Done!</b> Press <b>Finish</b>: you get a new "Ink" layer. Draw your clean lines over your sketch, then hide the <b>Sketch lines</b> layer with its eye.',
       tip: 'Try it again a few times. The 5th face is always much better than the 1st.',
       expect: 'none', finish: true }
   ]

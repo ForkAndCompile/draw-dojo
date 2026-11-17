@@ -98,7 +98,7 @@
           g.poly([[A.cx + A.h * 1.15, Y(A, 3.8)], [A.cx + A.h * 2.1, Y(A, 5.6)], [A.cx + A.h * 1.4, Y(A, 7.4)]]);
         } },
       { text: '<b>Done!</b> Now do 10 more, about 30 seconds each. Speed matters more than neatness here.',
-        tip: 'Use Clear (on the guide layer) between poses.',
+        tip: 'Use Clear (on the Sketch lines layer) between poses.',
         expect: 'none', finish: true }
     ]
   };

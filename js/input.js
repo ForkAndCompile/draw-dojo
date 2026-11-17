@@ -26,7 +26,7 @@
   function brushOpts(t) {
     return {
       brush: t,
-      color: layer && layer.guide ? st.guideColor : st.color,
+      color: layer && (layer.blue || layer.guide) ? st.guideColor : st.color,
       size: st.size * App.unit,
       opacity: st.opacity,
       pressure: st.pressure
@@ -43,8 +43,8 @@
     if (App.Move) App.Move.commit();   // drawing with another tool finishes a selection
     if (st.tool === 'picker') { App.setColor(App.pickColor(raw.x, raw.y)); return; }
     layer = App.active;
-    if (!layer.visible && layer.guide) { App.setGuidesVisible(true); App.toast('Guides shown again, so you can see what you draw.'); }
-    else if (!layer.visible) { App.toast('This layer is hidden. Click the eye in Layers to show it.'); return; }
+    if (layer.guide) { App.setActive(layer); layer = App.active; }   // never draw on Guides
+    if (!layer.visible) { App.toast('This layer is hidden. Click the eye in Layers to show it.'); return; }
     if (st.tool === 'fill') { App.Items.holdAction('fill', layer, raw.x, raw.y); return; }
     tool = e.button === 5 ? 'eraser' : st.tool;   // pen's eraser end
     try { App.overlay.setPointerCapture(e.pointerId); } catch (err) { /* not capturable; still works */ }

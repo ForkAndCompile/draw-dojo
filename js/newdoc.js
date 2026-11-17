@@ -35,7 +35,7 @@
     App.Drills.stop(); App.Move.cancel(); App.Ref.remove();
     App.resizeDocument(W, H, 1);
     App.unit = App.W / (App.paper.offsetWidth || App.W);   // brushes look the same size on screen
-    App.addLayer('Sketch', { silent: true });
+    App.addLayer('Drawing', { silent: true });
     App.addLayer('Guides', { guide: true, silent: true });
     App.setActive(App.layers[0]);
     App.resetView();
