@@ -111,7 +111,7 @@ Brush engines, 100 settings, unlimited layers or filters. Keeping it small is pa
 
 A web app (HTML, JavaScript and canvas) that runs in Chrome or Edge:
 
-- Nothing to install: double-click `index.html`.
+- Nothing to install: double-click `index.html` (the landing page), then Start drawing (`app.html`).
 - Browsers can read pen pressure.
 - Quick to change, so we can try ideas fast.
 - Can become an installable Windows app later without starting over.
@@ -120,7 +120,8 @@ A web app (HTML, JavaScript and canvas) that runs in Chrome or Edge:
 > settings (Wacom, Huion or XP-Pen) and turn **Windows Ink** on.
 
 ### Files
-- `index.html` — the page layout
+- `index.html` — the landing page (also the GitHub Pages site)
+- `app.html` — the app's page layout
 - `css/style.css` — the look
 - `js/core.js` — document, layers, undo history
 - `js/brush.js` — stabilizer, brushes, eraser, blur, smudge, fill, eyedropper

@@ -4,236 +4,235 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Draw Dojo</title>
-<link rel="stylesheet" href="css/style.css">
+<meta name="description" content="A free drawing app that helps you learn to draw: an Assist slider that tidies your wobbly lines, step-by-step lessons and practice drills. Runs in your browser.">
+<meta property="og:title" content="Draw Dojo: learn to draw, one cleaner line at a time">
+<meta property="og:description" content="Free drawing app with an Assist slider, 23 step-by-step lessons (faces, anime, neon cityscapes, comics) and practice drills. Nothing to install.">
+<meta property="og:image" content="https://forkandcompile.github.io/draw-dojo/docs/screenshot.png">
+<meta property="og:url" content="https://forkandcompile.github.io/draw-dojo/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314102a'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23ff4f8b' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%233fd0e0'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0e0b1a; --bg2: #16112a; --card: #1c1634; --line: #2e2650;
+    --text: #ece9f6; --muted: #a59fc0;
+    --pink: #ff4f8b; --purple: #9a63d8; --cyan: #3fd0e0; --gold: #ffd27a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { overflow-x: hidden; margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  a { color: var(--cyan); }
+  img { max-width: 100%; height: auto; display: block; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- hero: a sunset city made of layers, like the lessons teach ---------- */
+  .hero { position: relative; padding: 28px 0 0;
+    background: linear-gradient(180deg, #2a1f5c 0%, #6a3fb0 38%, #c45ab8 62%, #ff7aa2 80%, #ffb3c9 100%); }
+  .hero nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
+  .brand { font-size: 22px; font-weight: 300; letter-spacing: .4px; color: #fff; text-decoration: none; margin-right: auto; }
+  .brand b { font-weight: 700; }
+  .hero nav a:not(.brand) { color: #f3e9ff; text-decoration: none; opacity: .85; }
+  .hero nav a:not(.brand):hover { opacity: 1; }
+  .hero-text { position: relative; z-index: 3; text-align: center; padding: 70px 0 40px; }
+  .hero h1 { font-size: clamp(40px, 6.5vw, 76px); line-height: 1.05; margin: 0 0 18px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 4px 30px rgba(42, 20, 90, .45); }
+  .hero h1 span { color: #fff2c4; }
+  .hero p.lead { font-size: clamp(18px, 2.2vw, 22px); max-width: 680px; margin: 0 auto 30px; color: #fff; opacity: .92; }
+  .btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 28px; border-radius: 999px; font-weight: 700; font-size: 17px; text-decoration: none; transition: transform .15s, box-shadow .15s; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn.main { background: #fff; color: #3b1d78; box-shadow: 0 10px 40px rgba(255, 79, 139, .55); }
+  .btn.ghost { color: #fff; border: 2px solid rgba(255, 255, 255, .7); }
+  .hero small.hint { display: block; margin-top: 16px; color: #fff; opacity: .8; font-size: 14px; }
+  .skyline { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 300px; z-index: 1; display: block; }
+  .shot-hero { position: relative; z-index: 2; margin: 10px auto -140px; width: 100%; max-width: 980px; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(10, 5, 30, .7), 0 0 0 1px rgba(255, 255, 255, .12); }
+
+  /* ---------- sections ---------- */
+  section { padding: 90px 0; }
+  section.first { padding-top: 200px; }
+  h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.15; margin: 0 0 16px; letter-spacing: -.5px; }
+  h2 .glow { color: var(--pink); text-shadow: 0 0 24px rgba(255, 79, 139, .55); }
+  .kicker { color: var(--cyan); font-weight: 700; font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+  p.sub { color: var(--muted); font-size: 19px; max-width: 720px; margin: 0 0 34px; }
+  .center { text-align: center; } .center p.sub { margin-left: auto; margin-right: auto; }
+
+  .assist-demo { width: 100%; max-width: 860px; margin: 10px auto 0; display: block; }
+  .assist-demo .ink { fill: none; stroke: var(--text); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 520; stroke-dashoffset: 520; animation: draw 1.4s ease-out forwards; }
+  .assist-demo .ghost { fill: none; stroke: var(--pink); stroke-width: 2; stroke-dasharray: 6 6; opacity: .7; }
+  .assist-demo .lbl { fill: var(--cyan); font: 700 17px "Segoe UI", sans-serif; text-anchor: middle; }
+  .assist-demo .note { fill: var(--muted); font: 14px "Segoe UI", sans-serif; text-anchor: middle; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .slider-bar { max-width: 640px; margin: 26px auto 0; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #3a3360, var(--purple), var(--pink)); position: relative; }
+  .slider-bar::after { content: ""; position: absolute; left: 58%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #fff; box-shadow: 0 0 18px var(--pink); }
+
+  .split { display: grid; grid-template-columns: 1fr 1.25fr; gap: 50px; align-items: center; }
+  .split.flip { grid-template-columns: 1.25fr 1fr; }
+  .split.flip > :first-child { order: 2; }
+  .frame { border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, .5), 0 0 0 1px var(--line); }
+  ul.ticks { list-style: none; padding: 0; margin: 0; }
+  ul.ticks li { padding-left: 30px; position: relative; margin: 10px 0; color: #d9d4ec; }
+  ul.ticks li::before { content: "✦"; position: absolute; left: 0; color: var(--pink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chips span { padding: 6px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 14px; color: #d9d4ec; }
+  .chips span.adv { border-color: #7d4fd0; background: #2a1d4f; color: #f0e3ff; }
+
+  .city { background: radial-gradient(ellipse at 50% 120%, rgba(255, 79, 139, .25), transparent 60%), var(--bg2); }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .feat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+  .feat .ic { font-size: 26px; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; margin-bottom: 12px;
+    background: linear-gradient(135deg, rgba(255, 79, 139, .25), rgba(63, 208, 224, .2)); }
+  .feat h3 { margin: 0 0 6px; font-size: 18px; }
+  .feat p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .cta { text-align: center; background: linear-gradient(180deg, var(--bg) 0%, #2a1f5c 100%); }
+  .cta .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 900px; margin: 34px auto 36px; text-align: left; }
+  .cta .steps div { background: rgba(255, 255, 255, .05); border: 1px solid var(--line); border-radius: 14px; padding: 18px; color: #d9d4ec; font-size: 15px; }
+  .cta .steps b { display: block; color: var(--gold); font-size: 13px; letter-spacing: 1px; margin-bottom: 4px; }
+  .tip { max-width: 760px; margin: 30px auto 0; padding: 16px 20px; border-radius: 12px; border: 1px solid #6a4fb0; background: rgba(154, 99, 216, .12); color: #e6dcfa; font-size: 15px; text-align: left; }
+  footer { padding: 34px 0 44px; color: var(--muted); font-size: 14px; text-align: center; background: #2a1f5c; }
+  footer a { color: #e6dcfa; }
+
+  @media (max-width: 860px) {
+    .split, .split.flip, .grid, .cta .steps { grid-template-columns: 1fr; }
+    .split.flip > :first-child { order: 0; }
+    .hero nav a.hide-sm { display: none; }
+    .shot-hero { margin-bottom: -60px; }
+    section.first { padding-top: 120px; }
+    section { padding: 64px 0; }
+  }
+</style>
 </head>
 <body>
 
-<header id="topbar">
-  <div class="brand">Draw<b>Dojo</b></div>
-
-  <div class="bigbtns">
-    <button class="big tool-btn" data-tool="pen" title="Pen (B)"><span class="ic">✎</span>Pen</button>
-    <button class="big tool-btn" data-tool="eraser" title="Eraser (E)"><span class="ic">◌</span>Eraser</button>
-    <button class="big" id="btnUndo" title="Undo (Ctrl+Z)"><span class="ic">↶</span>Undo</button>
-    <button class="big" id="btnRedo" title="Redo (Ctrl+Y)"><span class="ic">↷</span>Redo</button>
-    <button class="big" id="btnClear" title="Clear this layer"><span class="ic">✕</span>Clear</button>
-    <button class="big" id="btnSave" title="Save as a picture, PNG (Ctrl+S)"><span class="ic">⤓</span>Save</button>
-    <button class="big" id="btnFile" title="New drawing, open, save project"><span class="ic">▤</span>File</button>
-  </div>
-  <div id="filePop" class="pop" hidden>
-    <button id="fNew">New drawing… <small>pick a format</small></button>
-    <button id="fOpen">Open… <small>project or picture</small></button>
-    <button id="fSaveProj">Save project <small>keeps layers</small></button>
-    <div class="pop-note" id="autosaveNote">Your drawing is saved automatically in this browser.</div>
-  </div>
-  <input type="file" id="fileInput" accept=".drawdojo,.drawassist,.json,image/*" hidden>
-
-  <div class="assist-box">
-    <div class="assist-head">
-      <span>Assist</span><b id="assistVal">50%</b>
+<header class="hero">
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="./">Draw<b>Dojo</b></a>
+      <a class="hide-sm" href="#assist">Assist</a>
+      <a class="hide-sm" href="#lessons">Lessons</a>
+      <a class="hide-sm" href="#features">Features</a>
+      <a href="https://github.com/ForkAndCompile/draw-dojo">GitHub</a>
+    </nav>
+    <div class="hero-text">
+      <h1>Learn to draw,<br><span>one cleaner line</span> at a time.</h1>
+      <p class="lead">A free drawing app that tidies your wobbly lines as much or as little as you want, teaches you step by step, and shows you getting better.</p>
+      <div class="btns">
+        <a class="btn main" href="app.html">✎ Start drawing, it's free</a>
+        <a class="btn ghost" href="https://github.com/ForkAndCompile/draw-dojo">★ Source on GitHub</a>
+      </div>
+      <small class="hint">Runs in your browser. Nothing to install, no account. Best in Chrome or Edge, with a mouse or a drawing tablet.</small>
     </div>
-    <input type="range" id="assist" min="0" max="100" value="50">
-    <div class="assist-scale"><span>Off</span><span>Clean</span><span>Perfect</span></div>
-    <div class="seg" id="assistMode">
-      <button data-mode="always" class="on" title="Correct every stroke when you lift the pen">Every stroke</button>
-      <button data-mode="hold" title="Only correct when you hold the pen still at the end of the line">Hold to fix</button>
-    </div>
+    <img class="shot-hero" src="docs/screenshot.png" alt="Draw Dojo painting a neon city skyline at sunset, with the lesson panel showing the color palette" width="1400" height="850">
   </div>
-
-  <button class="big learn" id="btnPractice" title="Short drills with scores"><span class="ic">◎</span>Practice</button>
-  <button class="big learn" id="btnLearn"><span class="ic">★</span>Learn</button>
+  <svg class="skyline" viewBox="0 0 1440 300" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#d77fd8" opacity=".55" d="M0 300V170h60v-40h50v60h70V120h40v70h90v-50h60v30h80V110h50v80h70v-40h60v50h90V130h40v60h80v-30h60v40h90V115h50v75h70v-50h60v40h90v-20h50V300z"/>
+    <path fill="#9a63d8" opacity=".75" d="M0 300V210h80v-60h60v80h90v-40h50v50h100V160h60v70h80v-30h70v50h90V180h60v40h90v-60h50v80h80v-40h60v40h90v-30h80V300z"/>
+    <path fill="#2a1f5c" d="M0 300V240h120v-50h70v60h140v-30h80v40h160v-20h90v30h150v-40h70v50h140v-30h90v40h120v-20h90v50z"/>
+  </svg>
 </header>
 
 <main>
-  <aside id="left" class="panel">
-    <h3>Brushes</h3>
-    <div class="brush-grid" id="brushList"><!-- filled from App.brushes with live previews --></div>
-
-    <label class="slider">Size <b id="sizeVal">6</b>
-      <input type="range" id="size" min="0" max="100" value="31"></label>
-    <label class="slider">Opacity <b id="opacityVal">100%</b>
-      <input type="range" id="opacity" min="5" max="100" value="100"></label>
-    <label class="slider">Stabilizer <b id="stabVal">40%</b>
-      <input type="range" id="stab" min="0" max="95" value="40"></label>
-    <label class="check"><input type="checkbox" id="pressure" checked> Pen pressure</label>
-
-    <h3>Shapes</h3>
-    <div class="shape-grid" id="shapeList">
-      <button class="shape-btn" data-shape="line" title="Line">╱</button>
-      <button class="shape-btn" data-shape="circle" title="Circle">○</button>
-      <button class="shape-btn" data-shape="oval" title="Oval">⬭</button>
-      <button class="shape-btn" data-shape="square" title="Square">□</button>
-      <button class="shape-btn" data-shape="rect" title="Rectangle">▭</button>
-      <button class="shape-btn" data-shape="triangle" title="Triangle">△</button>
-      <button class="shape-btn" data-shape="star" title="Star">☆</button>
-      <button class="shape-btn" data-shape="arrow" title="Arrow">➜</button>
-    </div>
-    <div class="seg small" id="shapeMode">
-      <button data-mode="outline" class="on" title="Only the border, drawn with your current brush">Outline</button>
-      <button data-mode="fill" title="Only the inside">Fill</button>
-      <button data-mode="both" title="Border and inside">Both</button>
-    </div>
-    <div class="row-label">Fills look</div>
-    <div class="seg small" id="fillStyle">
-      <button data-style="solid" class="on" title="Fills are one flat color">Solid</button>
-      <button data-style="brush" title="Fills look like your brush: pencil grain, soft airbrush, see-through marker">Like brush</button>
-      <button data-style="fade" title="Fills fade out: full color where you tap, fading across the area. Great for skies and fog.">Fade</button>
-    </div>
-
-    <h3>Shape helper</h3>
-    <label class="check"><input type="checkbox" id="fixLines" checked> Straight lines</label>
-    <label class="check"><input type="checkbox" id="fixOvals" checked> Circles &amp; ovals</label>
-    <label class="check"><input type="checkbox" id="fixCurves" checked> Curves</label>
-    <label class="check"><input type="checkbox" id="fixShapes" checked> Triangles, boxes &amp; corners</label>
-    <label class="check"><input type="checkbox" id="showGhost" checked> Show ghost &amp; score</label>
-    <label class="check" title="Hold the pen still: on a line the eraser deletes it and a pen recolors it; on an empty area a pen fills it">
-      <input type="checkbox" id="smartHold" checked> Hold still to pick a line</label>
-
-    <div class="pressure-test">
-      <span>Pressure</span><div class="pbar"><div id="pbarFill"></div></div>
-    </div>
-  </aside>
-
-  <section id="stage">
-    <div id="minibar">
-      <button class="mini tool-btn" data-tool="blur" title="Blur brush"><span>≋</span>Blur</button>
-      <button class="mini tool-btn" data-tool="smudge" title="Smudge brush"><span>☁</span>Smudge</button>
-      <button class="mini tool-btn" data-tool="fill" title="Fill bucket"><span>▣</span>Fill</button>
-      <button class="mini tool-btn" data-tool="picker" title="Eyedropper (I)"><span>◉</span>Pick</button>
-      <button class="mini tool-btn" data-tool="move" title="Move (V): tap a line, or draw a loop around lines, then drag, resize or turn them"><span>✥</span>Move</button>
-      <span class="sep"></span>
-      <button class="mini toggle" id="btnMirror" title="Mirror mode (R)"><span>⇹</span>Mirror</button>
-      <button class="mini toggle on" id="btnGuides" title="Show / hide guide layer (G)"><span>▦</span>Guides</button>
-      <span class="view-ctl">
-        <button class="mini" id="zoomOut" title="Zoom out (-)">−</button>
-        <button class="mini zoom-val" id="zoomVal">100%</button>
-        <button class="mini" id="zoomIn" title="Zoom in (+). Mouse wheel zooms too, Space+drag moves the page.">+</button>
-        <button class="mini" id="rotL" title="Turn the page left (,)">⟲</button>
-        <button class="mini" id="rotR" title="Turn the page right (.)">⟳</button>
-        <button class="mini toggle" id="btnFlip" title="Flip the view (H). Only the view, your drawing isn't changed."><span>⇋</span>Flip</button>
-      </span>
-    </div>
-    <div id="canvasWrap">
-      <div id="paper"></div>
+  <section class="first" id="assist">
+    <div class="wrap center">
+      <div class="kicker">The big idea</div>
+      <h2>An <span class="glow">Assist</span> slider for your hand</h2>
+      <p class="sub">Lift the pen and Draw Dojo works out what you meant: a line, circle, oval, curve, triangle, box, star. It moves your line toward the perfect shape by exactly as much as you choose. A faint ghost of the perfect shape and a score like "87% round" show how close you got, so you learn instead of just getting fixed.</p>
+      <svg class="assist-demo" viewBox="0 0 720 210" role="img" aria-label="The same wobbly circle at Assist off, 30%, 70% and perfect"><circle cx="90" cy="80" r="62" class="ghost"/><path d="M67.5 20.1 L70.5 18.5 L73.5 16.4 L76.9 16.2 L80.2 15.0 L83.6 15.1 L87.0 15.9 L90.3 15.9 L93.4 17.5 L96.5 18.0 L99.4 19.7 L102.3 20.9 L105.1 21.6 L108.0 22.1 L110.4 24.1 L113.2 24.9 L116.1 25.3 L119.1 25.8 L121.5 27.4 L124.0 28.8 L127.0 29.5 L128.5 32.2 L131.5 33.2 L132.9 35.9 L134.4 38.3 L135.9 40.7 L137.4 43.0 L139.3 45.1 L139.7 48.2 L141.4 50.4 L142.8 52.8 L143.9 55.4 L145.8 57.6 L146.9 60.3 L148.8 62.7 L151.1 65.2 L153.8 67.8 L155.2 70.8 L156.7 73.8 L158.5 76.9 L159.2 80.2 L159.4 83.5 L160.2 86.9 L159.6 90.2 L158.0 93.3 L157.3 96.6 L155.8 99.5 L154.6 102.6 L152.7 105.3 L150.3 107.7 L149.5 110.8 L146.6 112.8 L145.3 115.6 L144.0 118.4 L141.4 120.3 L140.0 123.0 L137.4 124.9 L135.9 127.6 L133.5 129.5 L130.7 130.9 L128.1 132.5 L124.6 132.7 L121.8 133.7 L118.5 133.9 L115.4 134.0 L112.2 133.7 L109.4 134.1 L106.5 134.2 L103.5 133.6 L100.8 134.0 L98.0 133.5 L95.5 135.0 L92.7 135.6 L89.9 136.8 L86.9 137.4 L84.0 137.3 L80.8 137.9 L77.6 138.6 L74.6 137.6 L71.2 137.8 L68.3 136.7 L65.3 135.6 L62.4 134.2 L59.2 133.5 L57.0 131.0 L54.3 129.4 L51.6 127.7 L48.6 126.5 L46.9 123.8 L43.9 122.5 L41.2 120.8 L38.2 119.3 L35.7 117.3 L33.2 115.2 L31.8 112.5 L29.6 110.3 L28.1 107.7 L26.1 105.2 L25.3 102.4 L26.1 99.0 L26.1 96.1 L26.5 93.2 L27.2 90.3 L27.6 87.6 L28.4 85.0 L29.8 82.4 L31.0 79.9 L31.0 77.6 L31.6 75.2 L31.6 72.8 L31.2 70.3 L31.7 67.9 L32.1 65.4 L32.2 62.8 L32.5 60.2 L34.0 58.0 L33.8 54.9 L35.1 52.6 L36.5 50.1 L38.3 48.0 L40.8 46.2 L42.8 44.2 L45.2 42.6 L46.7 40.1 L49.4 38.7 L51.5 36.6 L53.4 34.3 L55.5 32.1 L57.4 29.5 L59.9 27.4 L62.2 25.1 L64.7 22.6 L67.4 20.5 L70.2 18.4 L73.4 17.4 L76.4 15.1 L79.9 14.9 L83.4 15.4 L86.7 15.6 L90.0 16.0 L93.2 16.9" class="ink" style="animation-delay:0.00s"/><text x="90" y="178" class="lbl">Off</text><text x="90" y="198" class="note">your raw line</text><circle cx="270" cy="80" r="62" class="ghost"/><path d="M248.2 20.5 L251.1 19.1 L254.0 17.4 L257.2 17.1 L260.3 16.1 L263.6 16.1 L266.8 16.5 L269.9 16.5 L273.0 17.6 L276.0 18.1 L278.8 19.3 L281.6 20.3 L284.5 20.9 L287.3 21.5 L289.8 23.1 L292.5 23.9 L295.3 24.5 L298.2 25.2 L300.6 26.6 L303.1 28.0 L305.9 29.0 L307.7 31.3 L310.4 32.5 L312.0 34.9 L313.7 37.2 L315.4 39.5 L317.0 41.7 L318.9 43.8 L319.7 46.6 L321.4 48.8 L322.8 51.2 L324.0 53.7 L325.7 56.0 L326.8 58.6 L328.5 61.1 L330.3 63.7 L332.5 66.3 L333.7 69.1 L334.9 72.1 L336.3 75.1 L336.9 78.2 L337.2 81.4 L337.7 84.6 L337.3 87.7 L336.2 90.7 L335.6 93.8 L334.4 96.7 L333.4 99.7 L331.9 102.4 L330.0 104.9 L329.1 107.8 L326.8 110.0 L325.6 112.7 L324.3 115.4 L322.1 117.5 L320.7 120.1 L318.4 122.1 L316.8 124.7 L314.7 126.7 L312.1 128.3 L309.7 130.0 L306.7 130.7 L304.1 132.0 L301.1 132.6 L298.2 133.1 L295.3 133.4 L292.6 134.1 L289.9 134.6 L287.0 134.5 L284.4 135.1 L281.6 135.1 L279.0 136.3 L276.3 137.0 L273.5 138.0 L270.6 138.5 L267.7 138.6 L264.7 139.1 L261.6 139.6 L258.7 138.9 L255.5 139.0 L252.6 138.1 L249.7 137.2 L246.8 136.1 L243.7 135.5 L241.4 133.5 L238.7 132.1 L236.1 130.6 L233.2 129.4 L231.2 127.2 L228.4 125.8 L225.8 124.2 L223.1 122.7 L220.6 120.8 L218.2 118.9 L216.6 116.4 L214.5 114.2 L212.8 111.8 L210.9 109.5 L209.8 106.8 L209.9 103.8 L209.5 101.0 L209.3 98.3 L209.4 95.5 L209.4 92.9 L209.6 90.3 L210.3 87.7 L210.9 85.2 L210.7 82.7 L210.9 80.2 L210.7 77.7 L210.3 75.2 L210.6 72.6 L210.9 70.1 L210.9 67.4 L211.2 64.7 L212.3 62.4 L212.3 59.4 L213.4 56.9 L214.6 54.4 L216.1 52.1 L218.0 50.1 L219.7 47.9 L221.8 46.0 L223.2 43.5 L225.5 41.8 L227.3 39.6 L229.2 37.3 L231.1 35.1 L233.0 32.6 L235.3 30.5 L237.5 28.3 L239.8 26.0 L242.4 24.0 L245.0 22.0 L247.9 20.8 L250.7 18.8 L253.9 18.2 L257.0 18.2 L260.1 17.9 L263.2 17.9 L266.2 18.2" class="ink" style="animation-delay:0.35s"/><text x="270" y="178" class="lbl">30%</text><text x="270" y="198" class="note">less wobble, still yours</text><circle cx="450" cy="80" r="62" class="ghost"/><path d="M429.2 21.0 L432.0 19.9 L434.7 18.8 L437.7 18.3 L440.6 17.6 L443.5 17.4 L446.5 17.4 L449.4 17.4 L452.3 17.9 L455.2 18.1 L458.0 18.8 L460.8 19.5 L463.6 20.0 L466.3 20.6 L468.9 21.8 L471.6 22.6 L474.3 23.4 L477.0 24.4 L479.4 25.7 L481.9 27.0 L484.5 28.3 L486.5 30.2 L489.0 31.6 L490.9 33.7 L492.8 35.7 L494.7 37.8 L496.5 39.9 L498.3 42.0 L499.6 44.4 L501.3 46.7 L502.8 49.0 L504.1 51.5 L505.6 53.9 L506.7 56.4 L508.1 59.0 L509.4 61.5 L510.8 64.2 L511.7 66.9 L512.6 69.7 L513.5 72.6 L513.9 75.5 L514.1 78.5 L514.4 81.4 L514.3 84.4 L513.7 87.2 L513.3 90.1 L512.5 93.0 L511.8 95.8 L510.8 98.5 L509.6 101.1 L508.7 103.9 L507.1 106.3 L506.0 108.9 L504.7 111.5 L503.0 113.8 L501.6 116.3 L499.7 118.4 L498.1 120.8 L496.2 122.9 L494.0 124.8 L491.9 126.7 L489.4 128.1 L487.1 129.6 L484.6 130.9 L482.1 132.0 L479.5 133.0 L477.0 134.1 L474.4 135.1 L471.7 135.7 L469.1 136.6 L466.4 137.1 L463.8 138.2 L461.1 138.8 L458.4 139.6 L455.6 140.1 L452.7 140.3 L449.9 140.7 L446.9 141.0 L444.1 140.7 L441.1 140.6 L438.3 140.1 L435.5 139.5 L432.7 138.7 L429.8 138.1 L427.3 136.8 L424.6 135.7 L422.0 134.5 L419.3 133.3 L417.1 131.7 L414.5 130.3 L412.0 128.8 L409.5 127.3 L407.2 125.5 L404.9 123.7 L403.0 121.6 L401.0 119.5 L399.2 117.3 L397.3 115.1 L395.9 112.7 L395.0 110.2 L393.9 107.6 L393.0 105.1 L392.3 102.5 L391.6 99.9 L391.1 97.3 L390.9 94.7 L390.7 92.2 L390.1 89.6 L389.9 87.0 L389.6 84.3 L389.2 81.6 L389.2 79.0 L389.2 76.3 L389.3 73.5 L389.5 70.8 L390.1 68.2 L390.3 65.4 L391.1 62.7 L391.9 60.1 L393.0 57.6 L394.4 55.2 L395.7 52.8 L397.2 50.5 L398.5 48.0 L400.2 45.9 L401.9 43.6 L403.5 41.3 L405.3 39.1 L407.1 36.8 L409.1 34.7 L411.2 32.6 L413.4 30.5 L415.7 28.6 L418.0 26.8 L420.6 25.4 L423.1 23.6 L425.8 22.6 L428.6 21.8 L431.4 21.0 L434.1 20.4 L436.9 20.0" class="ink" style="animation-delay:0.70s"/><text x="450" y="178" class="lbl">70%</text><text x="450" y="198" class="note">almost clean</text><path d="M610.0 21.3 L612.6 20.5 L615.3 19.8 L618.0 19.2 L620.8 18.7 L623.5 18.3 L626.3 18.1 L629.1 18.0 L631.8 18.0 L634.6 18.2 L637.4 18.4 L640.2 18.8 L642.9 19.4 L645.6 20.0 L648.3 20.8 L650.9 21.6 L653.5 22.6 L656.1 23.7 L658.6 25.0 L661.0 26.3 L663.4 27.7 L665.7 29.3 L667.9 31.0 L670.1 32.7 L672.2 34.5 L674.2 36.5 L676.1 38.5 L677.9 40.6 L679.6 42.8 L681.2 45.1 L682.7 47.4 L684.1 49.8 L685.4 52.3 L686.6 54.8 L687.7 57.3 L688.7 60.0 L689.5 62.6 L690.2 65.3 L690.8 68.0 L691.3 70.8 L691.7 73.5 L691.9 76.3 L692.0 79.1 L692.0 81.8 L691.8 84.6 L691.6 87.4 L691.2 90.2 L690.6 92.9 L690.0 95.6 L689.2 98.3 L688.4 100.9 L687.4 103.5 L686.3 106.1 L685.0 108.6 L683.7 111.0 L682.3 113.4 L680.7 115.7 L679.0 117.9 L677.3 120.1 L675.5 122.2 L673.5 124.2 L671.5 126.1 L669.4 127.9 L667.2 129.6 L664.9 131.2 L662.6 132.7 L660.2 134.1 L657.7 135.4 L655.2 136.6 L652.7 137.7 L650.0 138.7 L647.4 139.5 L644.7 140.2 L642.0 140.8 L639.2 141.3 L636.5 141.7 L633.7 141.9 L630.9 142.0 L628.2 142.0 L625.4 141.8 L622.6 141.6 L619.8 141.2 L617.1 140.6 L614.4 140.0 L611.7 139.2 L609.1 138.4 L606.5 137.4 L603.9 136.3 L601.4 135.0 L599.0 133.7 L596.6 132.3 L594.3 130.7 L592.1 129.0 L589.9 127.3 L587.8 125.5 L585.8 123.5 L583.9 121.5 L582.1 119.4 L580.4 117.2 L578.8 114.9 L577.3 112.6 L575.9 110.2 L574.6 107.7 L573.4 105.2 L572.3 102.7 L571.3 100.0 L570.5 97.4 L569.8 94.7 L569.2 92.0 L568.7 89.2 L568.3 86.5 L568.1 83.7 L568.0 80.9 L568.0 78.2 L568.2 75.4 L568.4 72.6 L568.8 69.8 L569.4 67.1 L570.0 64.4 L570.8 61.7 L571.6 59.1 L572.6 56.5 L573.7 53.9 L575.0 51.4 L576.3 49.0 L577.7 46.6 L579.3 44.3 L581.0 42.1 L582.7 39.9 L584.5 37.8 L586.5 35.8 L588.5 33.9 L590.6 32.1 L592.8 30.4 L595.1 28.8 L597.4 27.3 L599.8 25.9 L602.3 24.6 L604.8 23.4 L607.3 22.3 L610.0 21.3" class="ink" style="animation-delay:1.05s"/><text x="630" y="178" class="lbl">Perfect</text><text x="630" y="198" class="note">a perfect circle</text></svg>
+      <div class="slider-bar" aria-hidden="true"></div>
     </div>
   </section>
 
-  <aside id="right" class="panel">
-    <h3>Color</h3>
-    <div class="picker">
-      <canvas id="svBox" title="Drag to pick brightness and strength"></canvas>
-      <canvas id="hueBar" title="Drag to pick the hue"></canvas>
-    </div>
-    <div class="color-row">
-      <div id="curSwatch" title="Current color"></div>
-      <input id="hexInput" maxlength="7" spellcheck="false" title="Type a hex color and press Enter">
-    </div>
-    <div class="sub">Recent</div>
-    <div class="swatches recent" id="recent"></div>
-
-    <h3>Layers</h3>
-    <div id="layerList"></div>
-    <div class="layer-actions">
-      <button id="layerAdd" title="New layer">+ New</button>
-      <button id="layerUp" title="Move up">▲</button>
-      <button id="layerDown" title="Move down">▼</button>
-      <button id="layerDel" title="Delete layer">Delete</button>
-    </div>
-    <div class="seg small" id="layerBlend" title="How this layer mixes with the layers under it">
-      <button data-blend="normal" class="on">Normal</button>
-      <button data-blend="screen" title="Brightens what is under it: neon, lights, glow">Glow</button>
-      <button data-blend="multiply" title="Darkens what is under it: shadows">Shade</button>
-    </div>
-    <label class="slider">Layer opacity <b id="layerOpVal">100%</b>
-      <input type="range" id="layerOp" min="0" max="100" value="100"></label>
-
-    <h3>Reference photo</h3>
-    <div id="refEmpty">
-      <button id="refLoad" class="wide">Load a photo…</button>
-      <small class="muted">Copy from it in a side window, or trace over it.</small>
-    </div>
-    <div id="refOn" hidden>
-      <div class="seg" id="refMode">
-        <button data-mode="window" title="Show the photo in a small window you can move">Side window</button>
-        <button data-mode="trace" title="Put the photo faintly under your drawing">Trace</button>
+  <section id="lessons">
+    <div class="wrap split">
+      <div>
+        <div class="kicker">23 lessons</div>
+        <h2>Lessons that draw <span class="glow">with</span> you</h2>
+        <p class="sub">Pick what you want to draw and a classic method. Each step shows where the next line goes, snaps your lines into place, and measures later steps from what <em>you</em> drew.</p>
+        <ul class="ticks">
+          <li>Faces with the circle method, a turned head, the box method and the eye</li>
+          <li>Bodies, hands, animals, landscapes, perspective and basic forms</li>
+          <li>"Set up for me" picks the right brush, color and layer for each step</li>
+        </ul>
+        <div class="chips">
+          <span>Faces</span><span>Bodies</span><span>Hands</span><span>Animals</span><span>Landscapes</span><span>Perspective</span><span>Objects</span>
+          <span class="adv">Neon cityscapes</span><span class="adv">Anime &amp; manga</span><span class="adv">Comics</span>
+        </div>
       </div>
-      <label class="slider" id="refOpRow"><span id="refOpLabel">Photo opacity</span> <b id="refOpVal">35%</b>
-        <input type="range" id="refOp" min="5" max="100" value="35"></label>
-      <div class="ref-btns">
-        <button id="refAdjust" class="toggle" title="Drag to move the photo, mouse wheel to resize it">Move photo</button>
-        <button id="refRemove">Remove</button>
+      <div class="frame"><img src="docs/shot-face.png" alt="The circle-method face lesson: guide lines snapped into place and hints for the eyes" loading="lazy" width="1400" height="850"></div>
+    </div>
+  </section>
+
+  <section class="city">
+    <div class="wrap split flip">
+      <div>
+        <div class="kicker">Advanced</div>
+        <h2>Paint glowing <span class="glow">neon cities</span></h2>
+        <p class="sub">The moody skyline style from art shorts, broken into simple steps: a fading sky, rows of building shapes from far to near, fog, lit windows, rain, reflections and glow. Plus anime faces, eyes and chibis, and comic pages with panels and inking.</p>
+        <ul class="ticks">
+          <li>Fade fills for skies and fog, Glow layers for neon</li>
+          <li>Every lesson comes with its own color palette</li>
+        </ul>
+      </div>
+      <div class="frame"><img src="docs/shot-learn.png" alt="The Learn menu with beginner subjects and the advanced Neon cityscapes, Anime and Comics lessons" loading="lazy" width="1400" height="850"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div>
+        <div class="kicker">Practice</div>
+        <h2>Watch yourself <span class="glow">get better</span></h2>
+        <p class="sub">Short drills (circles, straight lines between two dots, ovals, curves, boxes) with Assist switched off and a score for every try. Your results are kept, and when you're good at something, Draw Dojo suggests using less help.</p>
+      </div>
+      <div class="frame"><img src="docs/shot-practice.png" alt="An oval tracing drill with a score bar for each try" loading="lazy" width="1400" height="850"></div>
+    </div>
+  </section>
+
+  <section id="features" style="background: var(--bg2)">
+    <div class="wrap">
+      <div class="center">
+        <div class="kicker">Everything you need, nothing you don't</div>
+        <h2>Small on purpose</h2>
+        <p class="sub">No brush engine with a hundred settings. Just the tools that help you learn, all visible, no menus to dig through.</p>
+      </div>
+      <div class="grid">
+        <div class="feat"><div class="ic">✎</div><h3>Brushes that feel right</h3><p>Ink pen, fine liner, brush pen, grainy pencils, marker, airbrush. Pen pressure and a stabilizer for shaky hands.</p></div>
+        <div class="feat"><div class="ic">◯</div><h3>Shapes</h3><p>Lines, circles, ovals, boxes, triangles, stars and arrows, as outline, fill or both.</p></div>
+        <div class="feat"><div class="ic">▣</div><h3>A smart fill bucket</h3><p>Sees your lines, closes small gaps, fills behind lines. Solid, like your brush, or as a fade.</p></div>
+        <div class="feat"><div class="ic">✋</div><h3>Hold to pick</h3><p>Hold the eraser on a line to delete it, hold a pen on a line to recolor it or on an empty area to fill it.</p></div>
+        <div class="feat"><div class="ic">✥</div><h3>Move anything</h3><p>Move, resize and turn a line or a whole group. Crossing lines stay whole.</p></div>
+        <div class="feat"><div class="ic">▤</div><h3>Layers with glow</h3><p>Normal, Glow and Shade blending, a light-blue guide layer for sketch lines, and mirror mode.</p></div>
+        <div class="feat"><div class="ic">⟲</div><h3>Zoom, turn, flip</h3><p>Wheel to zoom, turn the page like real paper, flip the view to spot mistakes. Touch gestures too.</p></div>
+        <div class="feat"><div class="ic">◫</div><h3>Reference photo</h3><p>Copy from a see-through side window, or trace a faint photo under your drawing.</p></div>
+        <div class="feat"><div class="ic">⤓</div><h3>Never lose work</h3><p>Autosave in your browser, project files that keep layers, PNG export, any page format.</p></div>
       </div>
     </div>
-    <input type="file" id="refInput" accept="image/*" hidden>
-  </aside>
+  </section>
+
+  <section class="cta" id="start">
+    <div class="wrap">
+      <h2>Ready? Grab your pen.</h2>
+      <p class="sub" style="margin: 0 auto">Free forever, open source, no sign-up.</p>
+      <div class="steps">
+        <div><b>1 · OPEN</b>Click Start drawing below. Draw Dojo runs right in your browser.</div>
+        <div><b>2 · LEARN</b>Press Learn, pick a subject and a method, and follow the hints.</div>
+        <div><b>3 · PRACTICE</b>Press Practice for a few minutes of drills. Watch your scores climb.</div>
+      </div>
+      <div class="btns">
+        <a class="btn main" href="app.html">✎ Start drawing</a>
+        <a class="btn ghost" href="https://github.com/ForkAndCompile/draw-dojo/archive/refs/heads/main.zip">⤓ Download to use offline</a>
+      </div>
+      <div class="tip"><b>Drawing tablet?</b> For pen pressure in the browser, open your tablet's driver settings (Wacom, Huion, XP-Pen...) and turn <b>Windows Ink</b> on. Offline: unzip the download and double-click <code>index.html</code>.</div>
+    </div>
+  </section>
 </main>
 
-<footer id="bottombar">
-  <div id="score">Draw something. Lines, circles and curves get cleaned up by the Assist slider.</div>
-  <div id="hint"></div>
+<footer>
+  <div class="wrap">
+    Draw Dojo is free and open source under the <a href="https://github.com/ForkAndCompile/draw-dojo/blob/main/LICENSE">MIT license</a>.
+    Ideas, bug reports and new lessons are welcome on <a href="https://github.com/ForkAndCompile/draw-dojo">GitHub</a>.
+  </div>
 </footer>
-
-<div id="lessonPanel" hidden>
-  <div class="lp-head">
-    <span id="lpTitle">Lesson</span>
-    <span id="lpCount">1 / 6</span>
-    <button id="lpExit" title="Stop lesson">✕</button>
-  </div>
-  <div id="lpText"></div>
-  <div id="lpPalette" class="lp-palette"></div>
-  <button id="lpUse" class="use-btn" hidden></button>
-  <div id="lpStatus"></div>
-  <div class="lp-btns">
-    <button id="lpBack">◀ Back</button>
-    <button id="lpRedo" title="Clear the guide layer and start this lesson over">Start over</button>
-    <button id="lpNext" class="primary">Next ▶</button>
-  </div>
-</div>
-
-<div id="refWin" hidden>
-  <div class="rw-head" id="refWinHead"><span>Reference</span><button id="refWinClose" title="Close (the photo stays loaded)">✕</button></div>
-  <img id="refWinImg" alt="Reference photo">
-  <div class="rw-grip" id="refWinGrip" title="Drag to resize"></div>
-</div>
-
-<div id="drillPanel" class="float-panel" hidden>
-  <div class="lp-head"><span id="dpTitle">Practice</span><span id="dpCount"></span><button id="dpExit" title="Stop">✕</button></div>
-  <div id="dpText"></div>
-  <div id="dpScores"></div>
-  <div id="dpStatus"></div>
-  <div class="lp-btns"><button id="dpRestart">Start over</button><button id="dpSkip" class="primary">Skip ▶</button></div>
-</div>
-
-<div id="learnModal" hidden>
-  <div class="modal">
-    <button class="modal-x" id="learnClose">✕</button>
-    <h2 id="learnTitle">What do you want to draw?</h2>
-    <div id="learnBody"></div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<script src="js/core.js"></script>
-<script src="js/brush.js"></script>
-<script src="js/fill.js"></script>
-<script src="js/items.js"></script>
-<script src="js/color.js"></script>
-<script src="js/shapes.js"></script>
-<script src="js/methods.js"></script>
-<script src="js/methods2.js"></script>
-<script src="js/methods3.js"></script>
-<script src="js/methods4.js"></script>
-<script src="js/methods5.js"></script>
-<script src="js/lesson.js"></script>
-<script src="js/input.js"></script>
-<script src="js/view.js"></script>
-<script src="js/reference.js"></script>
-<script src="js/move.js"></script>
-<script src="js/drills.js"></script>
-<script src="js/stamp.js"></script>
-<script src="js/project.js"></script>
-<script src="js/newdoc.js"></script>
-<script src="js/ui.js"></script>
 </body>
 </html>

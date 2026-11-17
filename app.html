@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Draw Dojo</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">Draw<b>Dojo</b></div>
+
+  <div class="bigbtns">
+    <button class="big tool-btn" data-tool="pen" title="Pen (B)"><span class="ic">✎</span>Pen</button>
+    <button class="big tool-btn" data-tool="eraser" title="Eraser (E)"><span class="ic">◌</span>Eraser</button>
+    <button class="big" id="btnUndo" title="Undo (Ctrl+Z)"><span class="ic">↶</span>Undo</button>
+    <button class="big" id="btnRedo" title="Redo (Ctrl+Y)"><span class="ic">↷</span>Redo</button>
+    <button class="big" id="btnClear" title="Clear this layer"><span class="ic">✕</span>Clear</button>
+    <button class="big" id="btnSave" title="Save as a picture, PNG (Ctrl+S)"><span class="ic">⤓</span>Save</button>
+    <button class="big" id="btnFile" title="New drawing, open, save project"><span class="ic">▤</span>File</button>
+  </div>
+  <div id="filePop" class="pop" hidden>
+    <button id="fNew">New drawing… <small>pick a format</small></button>
+    <button id="fOpen">Open… <small>project or picture</small></button>
+    <button id="fSaveProj">Save project <small>keeps layers</small></button>
+    <div class="pop-note" id="autosaveNote">Your drawing is saved automatically in this browser.</div>
+  </div>
+  <input type="file" id="fileInput" accept=".drawdojo,.drawassist,.json,image/*" hidden>
+
+  <div class="assist-box">
+    <div class="assist-head">
+      <span>Assist</span><b id="assistVal">50%</b>
+    </div>
+    <input type="range" id="assist" min="0" max="100" value="50">
+    <div class="assist-scale"><span>Off</span><span>Clean</span><span>Perfect</span></div>
+    <div class="seg" id="assistMode">
+      <button data-mode="always" class="on" title="Correct every stroke when you lift the pen">Every stroke</button>
+      <button data-mode="hold" title="Only correct when you hold the pen still at the end of the line">Hold to fix</button>
+    </div>
+  </div>
+
+  <button class="big learn" id="btnPractice" title="Short drills with scores"><span class="ic">◎</span>Practice</button>
+  <button class="big learn" id="btnLearn"><span class="ic">★</span>Learn</button>
+</header>
+
+<main>
+  <aside id="left" class="panel">
+    <h3>Brushes</h3>
+    <div class="brush-grid" id="brushList"><!-- filled from App.brushes with live previews --></div>
+
+    <label class="slider">Size <b id="sizeVal">6</b>
+      <input type="range" id="size" min="0" max="100" value="31"></label>
+    <label class="slider">Opacity <b id="opacityVal">100%</b>
+      <input type="range" id="opacity" min="5" max="100" value="100"></label>
+    <label class="slider">Stabilizer <b id="stabVal">40%</b>
+      <input type="range" id="stab" min="0" max="95" value="40"></label>
+    <label class="check"><input type="checkbox" id="pressure" checked> Pen pressure</label>
+
+    <h3>Shapes</h3>
+    <div class="shape-grid" id="shapeList">
+      <button class="shape-btn" data-shape="line" title="Line">╱</button>
+      <button class="shape-btn" data-shape="circle" title="Circle">○</button>
+      <button class="shape-btn" data-shape="oval" title="Oval">⬭</button>
+      <button class="shape-btn" data-shape="square" title="Square">□</button>
+      <button class="shape-btn" data-shape="rect" title="Rectangle">▭</button>
+      <button class="shape-btn" data-shape="triangle" title="Triangle">△</button>
+      <button class="shape-btn" data-shape="star" title="Star">☆</button>
+      <button class="shape-btn" data-shape="arrow" title="Arrow">➜</button>
+    </div>
+    <div class="seg small" id="shapeMode">
+      <button data-mode="outline" class="on" title="Only the border, drawn with your current brush">Outline</button>
+      <button data-mode="fill" title="Only the inside">Fill</button>
+      <button data-mode="both" title="Border and inside">Both</button>
+    </div>
+    <div class="row-label">Fills look</div>
+    <div class="seg small" id="fillStyle">
+      <button data-style="solid" class="on" title="Fills are one flat color">Solid</button>
+      <button data-style="brush" title="Fills look like your brush: pencil grain, soft airbrush, see-through marker">Like brush</button>
+      <button data-style="fade" title="Fills fade out: full color where you tap, fading across the area. Great for skies and fog.">Fade</button>
+    </div>
+
+    <h3>Shape helper</h3>
+    <label class="check"><input type="checkbox" id="fixLines" checked> Straight lines</label>
+    <label class="check"><input type="checkbox" id="fixOvals" checked> Circles &amp; ovals</label>
+    <label class="check"><input type="checkbox" id="fixCurves" checked> Curves</label>
+    <label class="check"><input type="checkbox" id="fixShapes" checked> Triangles, boxes &amp; corners</label>
+    <label class="check"><input type="checkbox" id="showGhost" checked> Show ghost &amp; score</label>
+    <label class="check" title="Hold the pen still: on a line the eraser deletes it and a pen recolors it; on an empty area a pen fills it">
+      <input type="checkbox" id="smartHold" checked> Hold still to pick a line</label>
+
+    <div class="pressure-test">
+      <span>Pressure</span><div class="pbar"><div id="pbarFill"></div></div>
+    </div>
+  </aside>
+
+  <section id="stage">
+    <div id="minibar">
+      <button class="mini tool-btn" data-tool="blur" title="Blur brush"><span>≋</span>Blur</button>
+      <button class="mini tool-btn" data-tool="smudge" title="Smudge brush"><span>☁</span>Smudge</button>
+      <button class="mini tool-btn" data-tool="fill" title="Fill bucket"><span>▣</span>Fill</button>
+      <button class="mini tool-btn" data-tool="picker" title="Eyedropper (I)"><span>◉</span>Pick</button>
+      <button class="mini tool-btn" data-tool="move" title="Move (V): tap a line, or draw a loop around lines, then drag, resize or turn them"><span>✥</span>Move</button>
+      <span class="sep"></span>
+      <button class="mini toggle" id="btnMirror" title="Mirror mode (R)"><span>⇹</span>Mirror</button>
+      <button class="mini toggle on" id="btnGuides" title="Show / hide guide layer (G)"><span>▦</span>Guides</button>
+      <span class="view-ctl">
+        <button class="mini" id="zoomOut" title="Zoom out (-)">−</button>
+        <button class="mini zoom-val" id="zoomVal">100%</button>
+        <button class="mini" id="zoomIn" title="Zoom in (+). Mouse wheel zooms too, Space+drag moves the page.">+</button>
+        <button class="mini" id="rotL" title="Turn the page left (,)">⟲</button>
+        <button class="mini" id="rotR" title="Turn the page right (.)">⟳</button>
+        <button class="mini toggle" id="btnFlip" title="Flip the view (H). Only the view, your drawing isn't changed."><span>⇋</span>Flip</button>
+      </span>
+    </div>
+    <div id="canvasWrap">
+      <div id="paper"></div>
+    </div>
+  </section>
+
+  <aside id="right" class="panel">
+    <h3>Color</h3>
+    <div class="picker">
+      <canvas id="svBox" title="Drag to pick brightness and strength"></canvas>
+      <canvas id="hueBar" title="Drag to pick the hue"></canvas>
+    </div>
+    <div class="color-row">
+      <div id="curSwatch" title="Current color"></div>
+      <input id="hexInput" maxlength="7" spellcheck="false" title="Type a hex color and press Enter">
+    </div>
+    <div class="sub">Recent</div>
+    <div class="swatches recent" id="recent"></div>
+
+    <h3>Layers</h3>
+    <div id="layerList"></div>
+    <div class="layer-actions">
+      <button id="layerAdd" title="New layer">+ New</button>
+      <button id="layerUp" title="Move up">▲</button>
+      <button id="layerDown" title="Move down">▼</button>
+      <button id="layerDel" title="Delete layer">Delete</button>
+    </div>
+    <div class="seg small" id="layerBlend" title="How this layer mixes with the layers under it">
+      <button data-blend="normal" class="on">Normal</button>
+      <button data-blend="screen" title="Brightens what is under it: neon, lights, glow">Glow</button>
+      <button data-blend="multiply" title="Darkens what is under it: shadows">Shade</button>
+    </div>
+    <label class="slider">Layer opacity <b id="layerOpVal">100%</b>
+      <input type="range" id="layerOp" min="0" max="100" value="100"></label>
+
+    <h3>Reference photo</h3>
+    <div id="refEmpty">
+      <button id="refLoad" class="wide">Load a photo…</button>
+      <small class="muted">Copy from it in a side window, or trace over it.</small>
+    </div>
+    <div id="refOn" hidden>
+      <div class="seg" id="refMode">
+        <button data-mode="window" title="Show the photo in a small window you can move">Side window</button>
+        <button data-mode="trace" title="Put the photo faintly under your drawing">Trace</button>
+      </div>
+      <label class="slider" id="refOpRow"><span id="refOpLabel">Photo opacity</span> <b id="refOpVal">35%</b>
+        <input type="range" id="refOp" min="5" max="100" value="35"></label>
+      <div class="ref-btns">
+        <button id="refAdjust" class="toggle" title="Drag to move the photo, mouse wheel to resize it">Move photo</button>
+        <button id="refRemove">Remove</button>
+      </div>
+    </div>
+    <input type="file" id="refInput" accept="image/*" hidden>
+  </aside>
+</main>
+
+<footer id="bottombar">
+  <div id="score">Draw something. Lines, circles and curves get cleaned up by the Assist slider.</div>
+  <div id="hint"></div>
+</footer>
+
+<div id="lessonPanel" hidden>
+  <div class="lp-head">
+    <span id="lpTitle">Lesson</span>
+    <span id="lpCount">1 / 6</span>
+    <button id="lpExit" title="Stop lesson">✕</button>
+  </div>
+  <div id="lpText"></div>
+  <div id="lpPalette" class="lp-palette"></div>
+  <button id="lpUse" class="use-btn" hidden></button>
+  <div id="lpStatus"></div>
+  <div class="lp-btns">
+    <button id="lpBack">◀ Back</button>
+    <button id="lpRedo" title="Clear the guide layer and start this lesson over">Start over</button>
+    <button id="lpNext" class="primary">Next ▶</button>
+  </div>
+</div>
+
+<div id="refWin" hidden>
+  <div class="rw-head" id="refWinHead"><span>Reference</span><button id="refWinClose" title="Close (the photo stays loaded)">✕</button></div>
+  <img id="refWinImg" alt="Reference photo">
+  <div class="rw-grip" id="refWinGrip" title="Drag to resize"></div>
+</div>
+
+<div id="drillPanel" class="float-panel" hidden>
+  <div class="lp-head"><span id="dpTitle">Practice</span><span id="dpCount"></span><button id="dpExit" title="Stop">✕</button></div>
+  <div id="dpText"></div>
+  <div id="dpScores"></div>
+  <div id="dpStatus"></div>
+  <div class="lp-btns"><button id="dpRestart">Start over</button><button id="dpSkip" class="primary">Skip ▶</button></div>
+</div>
+
+<div id="learnModal" hidden>
+  <div class="modal">
+    <button class="modal-x" id="learnClose">✕</button>
+    <h2 id="learnTitle">What do you want to draw?</h2>
+    <div id="learnBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="js/core.js"></script>
+<script src="js/brush.js"></script>
+<script src="js/fill.js"></script>
+<script src="js/items.js"></script>
+<script src="js/color.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/methods.js"></script>
+<script src="js/methods2.js"></script>
+<script src="js/methods3.js"></script>
+<script src="js/methods4.js"></script>
+<script src="js/methods5.js"></script>
+<script src="js/lesson.js"></script>
+<script src="js/input.js"></script>
+<script src="js/view.js"></script>
+<script src="js/reference.js"></script>
+<script src="js/move.js"></script>
+<script src="js/drills.js"></script>
+<script src="js/stamp.js"></script>
+<script src="js/project.js"></script>
+<script src="js/newdoc.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

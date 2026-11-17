@@ -4,6 +4,8 @@
 or as little as you like, step-by-step lessons show you where every line goes, and short drills
 score your progress. Runs in the browser, nothing to install.
 
+**[Try it online →](https://forkandcompile.github.io/draw-dojo/)**
+
 ![Draw Dojo painting a neon skyline in the "Layered skyline at sunset" lesson](docs/screenshot.png)
 
 ## The idea: an Assist slider
@@ -33,10 +35,14 @@ score ("87% round") show you how you did, so you learn instead of just getting f
 
 ## Use it
 
-1. Download or clone this repository.
-2. Double-click `index.html`. It opens in your browser (Chrome or Edge recommended).
+**Online:** go to **https://forkandcompile.github.io/draw-dojo/** and press **Start drawing**.
 
-That's it. No install, no account, no internet needed after download.
+**Offline:**
+
+1. [Download the ZIP](https://github.com/ForkAndCompile/draw-dojo/archive/refs/heads/main.zip) (or clone this repository) and unzip it.
+2. Double-click `index.html` and press **Start drawing** (or open `app.html` directly).
+
+That's it. No install, no account, no internet needed after download. Chrome or Edge recommended.
 
 > **Drawing tablet tip:** for pen pressure in the browser, open your tablet's driver settings
 > (Wacom, Huion, XP-Pen...) and turn **Windows Ink** on.
@@ -64,6 +70,8 @@ reload the page. A short tour of the code:
 
 | File | What it does |
 |------|--------------|
+| `index.html` | the landing page |
+| `app.html` | the app |
 | `js/core.js` | document, layers, undo history |
 | `js/brush.js`, `js/fill.js` | brushes, stabilizer, fill bucket |
 | `js/shapes.js` | shape recognition, scoring and correction (the Assist) |
