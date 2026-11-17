@@ -78,7 +78,7 @@
   /* ---------- 2. Rainy neon night ---------- */
   const horizonStep = {
     text: 'On the guide layer, draw the <b>horizon line</b> straight across, a bit below the middle.',
-    tip: 'It snaps straight. The red dot will be your vanishing point.',
+    tip: 'It snaps straight. This is a guide line: it hides with G at the end. The red dot will be your vanishing point.',
     use: { guide: true, tool: 'pen', size: 3, say: 'Draw one line across the page.' },
     expect: 'line',
     hint: (g, A) => g.line(0, A.hy, A.W, A.hy),

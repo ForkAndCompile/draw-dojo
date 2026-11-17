@@ -82,6 +82,7 @@
     if (!App.isPaintTool(st.tool)) App.setTool('pen');
 
     L.method = m; L.active = id;
+    L.showHints = true; $('lpHints').classList.add('on');
     L.A = m.frame(App.W, App.H);
     $('lpTitle').textContent = `${m.name} · ${m.sub.split('·')[0].trim()}`;
     $('lessonPanel').hidden = false;
@@ -139,7 +140,7 @@
       if (u.size) parts.push('size ' + u.size);
       if (u.fill) parts.push(u.fill + ' fill');
       if (u.layer) parts.push('layer "' + u.layer + '"' + (u.blend === 'screen' ? ' (glow)' : u.blend === 'multiply' ? ' (shade)' : ''));
-      if (u.guide) parts.push('guide layer');
+      if (u.guide) parts.push('guide layer (sketch lines, hide with G)');
       use.innerHTML = (u.color ? `<i style="background:${u.color}"></i>` : '') + 'Set up for me: ' + parts.join(' · ');
       use.onclick = () => applyUse(u);
     }
@@ -155,7 +156,10 @@
       if (u.blend) Ly.blend = u.blend;
       if (u.opacity != null) Ly.opacity = u.opacity;
       App.setActive(Ly);
-    } else if (u.guide && App.guideLayer()) App.setActive(App.guideLayer());
+    } else if (u.guide && App.guideLayer()) {
+      if (!App.guideLayer().visible) App.setGuidesVisible(true);
+      App.setActive(App.guideLayer());
+    }
     if (u.fill) App.settings.fillStyle = u.fill;
     if (u.shape) { App.settings.shape = u.shape; if (u.shapeMode) App.settings.shapeMode = u.shapeMode; }
     if (u.assist != null) App.settings.assist = u.assist;
@@ -200,7 +204,7 @@
   };
   L.drawHints = function (ctx) {
     const s = step();
-    if (!s) return;
+    if (!s || L.showHints === false) return;
     ctx.save();
     const g = M.makeG(ctx, App.viewPx());
     // earlier steps stay visible as faint blue guides, so you never lose your place
@@ -217,6 +221,12 @@
     $('learnClose').onclick = L.closePicker;
     $('learnModal').addEventListener('pointerdown', e => { if (e.target.id === 'learnModal') L.closePicker(); });
     $('lpExit').onclick = L.stop;
+    $('lpHints').onclick = () => {
+      L.showHints = L.showHints === false;
+      $('lpHints').classList.toggle('on', L.showHints);
+      App.toast(L.showHints ? 'Lesson hints shown' : 'Lesson hints hidden. Everything you drew stays.');
+      App.requestOverlay();
+    };
     $('lpBack').onclick = () => go(L.i - 1);
     $('lpNext').onclick = () => (step().finish ? finish() : go(L.i + 1));
     $('lpRedo').onclick = () => {
