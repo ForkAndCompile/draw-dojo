@@ -55,11 +55,11 @@
   /* ---------- drawing <-> plain data ---------- */
   async function packItem(it) {
     const base = { kind: it.kind, rect: it.rect };
-    if (it.kind === 'fill') return { ...base, x: it.x, y: it.y, opacity: it.opacity, img: await toBlob(it.canvas) };
+    if (it.kind === 'fill') return { ...base, x: it.x, y: it.y, opacity: it.opacity, under: it.under !== false, img: await toBlob(it.canvas) };
     return { ...base, o: it.o, strokes: it.strokes.map(pts => pts.flatMap(p => [r1(p.x), r1(p.y), Math.round(p.p * 100) / 100])) };
   }
   async function unpackItem(d) {
-    if (d.kind === 'fill') return { kind: 'fill', x: d.x, y: d.y, opacity: d.opacity, rect: d.rect, canvas: await canvasFrom(d.img), alive: true };
+    if (d.kind === 'fill') return { kind: 'fill', x: d.x, y: d.y, opacity: d.opacity, rect: d.rect, under: d.under !== false, canvas: await canvasFrom(d.img), alive: true };
     const strokes = d.strokes.map(a => { const pts = []; for (let i = 0; i < a.length; i += 3) pts.push({ x: a[i], y: a[i + 1], p: a[i + 2] }); return pts; });
     return { kind: d.kind, o: d.o, rect: d.rect, strokes, alive: true };
   }
@@ -169,7 +169,7 @@
     App.setActive(L);
     const tok = App.beginEdit(L);
     L.ctx.drawImage(c, x, y);
-    const it = App.Items.addFill(L, { canvas: c, x, y, rect: { x0: x, y0: y, x1: x + w, y1: y + h } }, 1);
+    const it = App.Items.addFill(L, { canvas: c, x, y, rect: { x0: x, y0: y, x1: x + w, y1: y + h } }, 1, false);
     App.endEdit(tok, it.rect, App.Items.undoable(it));
     App.toast('Picture added as a new layer. Use Move (V) to place it.');
   };

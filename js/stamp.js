@@ -102,8 +102,8 @@
     let rect = null;
     if (wantsFill(g)) {
       const look = App.fillLook('fill'), f = fillCanvas(pts, o.color, look, a);
-      App.paintFill(layer, f.canvas, f.x, f.y, look.opacity);
-      items.push(App.Items.addFill(layer, f, look.opacity));
+      App.paintFill(layer, f.canvas, f.x, f.y, look.opacity, false);   // shapes go on top, like normal paint
+      items.push(App.Items.addFill(layer, f, look.opacity, false));
       rect = f.rect;
     }
     if (wantsLine(g)) {

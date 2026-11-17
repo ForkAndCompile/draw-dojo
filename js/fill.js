@@ -170,10 +170,10 @@
   };
 
   /* Fills go behind what is already on the layer. */
-  App.paintFill = function (layer, canvas, x, y, opacity) {
+  App.paintFill = function (layer, canvas, x, y, opacity, under = true) {
     const c = layer.ctx;
     c.save();
-    c.globalCompositeOperation = 'destination-over';
+    c.globalCompositeOperation = under ? 'destination-over' : 'source-over';
     c.globalAlpha = opacity;
     c.drawImage(canvas, x, y);
     c.restore();

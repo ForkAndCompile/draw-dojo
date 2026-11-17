@@ -19,8 +19,9 @@
     layer.items.push(it);
     return it;
   };
-  I.addFill = function (layer, fill, opacity) {
-    const it = { kind: 'fill', canvas: fill.canvas, x: fill.x, y: fill.y, opacity, rect: fill.rect, alive: true };
+  /* under: true for the fill bucket (paint tucks under the lines), false for shapes and pictures (on top). */
+  I.addFill = function (layer, fill, opacity, under = true) {
+    const it = { kind: 'fill', canvas: fill.canvas, x: fill.x, y: fill.y, opacity, rect: fill.rect, under, alive: true };
     layer.items.push(it);
     return it;
   };
@@ -95,7 +96,7 @@
   /* Draw one remembered item exactly as it was first drawn. */
   function renderItem(ctx, it) {
     if (it.kind === 'fill') {
-      ctx.save(); ctx.globalCompositeOperation = 'destination-over'; ctx.globalAlpha = it.opacity;
+      ctx.save(); ctx.globalCompositeOperation = it.under === false ? 'source-over' : 'destination-over'; ctx.globalAlpha = it.opacity;
       ctx.drawImage(it.canvas, it.x, it.y); ctx.restore();
       return;
     }

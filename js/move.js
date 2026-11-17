@@ -91,7 +91,7 @@
       const c = document.createElement('canvas');
       c.width = Math.max(1, Math.ceil(b.x1) - x); c.height = Math.max(1, Math.ceil(b.y1) - y);
       const ctx = c.getContext('2d'); ctx.translate(-x, -y); applyCtx(ctx); ctx.drawImage(it.canvas, it.x, it.y);
-      return { canvas: c, x, y, rect: { x0: x, y0: y, x1: x + c.width, y1: y + c.height } };
+      return { canvas: c, x, y, under: false, rect: { x0: x, y0: y, x1: x + c.width, y1: y + c.height } };
     }
     const strokes = it.strokes.map(pts => pts.map(map)), size = it.o.size * T().s;
     const pad = size * 1.3 + 4;
@@ -99,7 +99,8 @@
     for (const pts of strokes) for (const p of pts) rect = App.util.rectAdd(rect, p.x, p.y, pad);
     return { strokes, o: { ...it.o, size }, rect };
   }
-  const geom = it => (it.kind === 'fill' ? { canvas: it.canvas, x: it.x, y: it.y, rect: it.rect } : { strokes: it.strokes, o: it.o, rect: it.rect });
+  const geom = it => (it.kind === 'fill' ? { canvas: it.canvas, x: it.x, y: it.y, rect: it.rect, under: it.under } : { strokes: it.strokes, o: it.o, rect: it.rect });
+  const fillsFirst = items => items.filter(i => i.kind === 'fill').concat(items.filter(i => i.kind !== 'fill'));
 
   Mv.commit = function () {
     if (!sel) return;
@@ -114,9 +115,10 @@
     let area = null;
     s.items.forEach((it, k) => { Object.assign(it, after[k]); area = union(area, before[k].rect); area = union(area, after[k].rect); });
     // moved things end up on top
-    const newOrder = s.order.filter(it => !s.items.includes(it)).concat(s.items);
+    const group = fillsFirst(s.items);
+    const newOrder = s.order.filter(it => !s.items.includes(it)).concat(group);
     s.layer.items = newOrder.slice();
-    for (const it of s.items) I.renderItem(s.layer.ctx, it);
+    for (const it of group) I.renderItem(s.layer.ctx, it);
     App.endEdit(s.tok, area, {
       undo: () => { s.items.forEach((it, k) => Object.assign(it, before[k])); s.layer.items = s.order.slice(); },
       redo: () => { s.items.forEach((it, k) => Object.assign(it, after[k])); s.layer.items = newOrder.slice(); }
@@ -179,15 +181,19 @@
     }
     const layer = App.active;
     if (!layer.visible) { App.toast('This layer is hidden'); return { move() {}, up() {} }; }
-    const hit = I.hit(layer, raw.x, raw.y);
-    if (hit) { select(layer, [hit]); return dragger(raw); }
+    // Pressing right ON a line grabs it at once. Anywhere else (empty paper, or on top of a
+    // filled shape like a sky or a building) starts the lasso, so big fills never get in the way.
+    const hit = I.hit(layer, raw.x, raw.y, 3);
+    if (hit && hit.kind === 'stroke') { select(layer, [hit]); return dragger(raw); }
     lasso = [raw];
     return {
       move(p) { lasso.push(p); },
       up() {
         const poly = lasso; lasso = null;
         if (poly.length < 3 || App.Shapes.pathLength(poly) < 30 * u) {
-          App.toast('Press on a line to move it, or draw a loop around lines to pick them.');
+          // just a tap: pick the filled shape or picture under the pen, if there is one
+          if (hit) { select(layer, [hit]); return; }
+          App.toast('Press on a line to move it, draw a loop around things to pick them, or tap a filled shape.');
           return;
         }
         const items = layer.items.filter(it => I.pickable(it) && inLasso(it, poly));
@@ -235,7 +241,7 @@
   const shifted = (r, dx, dy) => ({ x0: r.x0 + dx, y0: r.y0 + dy, x1: r.x1 + dx, y1: r.y1 + dy });
   /* A copy of an item, moved by (dx, dy). Fill pictures are never changed in place, so copies can share them. */
   function cloneItem(it, dx = 0, dy = 0) {
-    if (it.kind === 'fill') return { kind: 'fill', canvas: it.canvas, x: it.x + dx, y: it.y + dy, opacity: it.opacity, rect: shifted(it.rect, dx, dy), alive: true };
+    if (it.kind === 'fill') return { kind: 'fill', canvas: it.canvas, x: it.x + dx, y: it.y + dy, opacity: it.opacity, under: false, rect: shifted(it.rect, dx, dy), alive: true };
     return { kind: it.kind, o: { ...it.o }, rect: shifted(it.rect, dx, dy), alive: true,
              strokes: it.strokes.map(pts => pts.map(p => ({ x: p.x + dx, y: p.y + dy, p: p.p }))) };
   }
@@ -244,6 +250,7 @@
 
   /* Put copies on a layer (one undo step) and pick them, ready to drag. */
   function placeCopies(layer, items) {
+    items = fillsFirst(items);
     const tok = App.beginEdit(layer);
     let area = null;
     for (const it of items) { I.renderItem(layer.ctx, it); layer.items.push(it); area = union(area, it.rect); }
