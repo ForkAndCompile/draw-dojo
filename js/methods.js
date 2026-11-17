@@ -7,39 +7,40 @@ const M = App.Methods = { list: {}, subjects: [] };
 
 /* ---------- hint drawing ---------- */
 M.makeG = function (ctx, u) {
-  const NOW = 'rgba(255, 128, 0, 0.9)', REF = 'rgba(111, 168, 220, 0.55)', PAST = 'rgba(111, 168, 220, 0.38)';
+  const NOW = 'rgba(255, 150, 20, 1)', REF = 'rgba(140, 200, 255, 0.8)', PAST = 'rgba(150, 210, 255, 0.6)';
   let style = NOW, past = false;
   const setStyle = small => {
     const s = past ? PAST : style;
     ctx.strokeStyle = s; ctx.fillStyle = s;
-    ctx.lineWidth = (s === NOW ? 2 : 1.3) * u;
+    ctx.lineWidth = (s === NOW ? 2.4 : 1.5) * u;
     ctx.setLineDash(small ? [] : s === NOW ? [9 * u, 6 * u] : [4 * u, 5 * u]);
   };
-  const SMALL = 14 * u;   // small circles look better solid than dashed
+  const SMALL = 14 * u;
+  const stroke = () => App.haloStroke(ctx, past ? 0.4 : 0.75);   // dark outline: visible on any color   // small circles look better solid than dashed
   const g = {
     u,
     now() { style = NOW; return g; },
     ref() { style = REF; return g; },
     past(on) { past = on; return g; },   // earlier steps: everything faint blue
-    line(x1, y1, x2, y2) { setStyle(); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); return g; },
-    circle(x, y, r) { setStyle(r < SMALL); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke(); return g; },
-    ellipse(x, y, rx, ry, rot = 0) { setStyle(Math.max(Math.abs(rx), Math.abs(ry)) < SMALL); ctx.beginPath(); ctx.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot, 0, Math.PI * 2); ctx.stroke(); return g; },
-    rect(x, y, w, h) { setStyle(); ctx.strokeRect(x, y, w, h); return g; },
+    line(x1, y1, x2, y2) { setStyle(); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); stroke(); return g; },
+    circle(x, y, r) { setStyle(r < SMALL); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); stroke(); return g; },
+    ellipse(x, y, rx, ry, rot = 0) { setStyle(Math.max(Math.abs(rx), Math.abs(ry)) < SMALL); ctx.beginPath(); ctx.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot, 0, Math.PI * 2); stroke(); return g; },
+    rect(x, y, w, h) { setStyle(); ctx.beginPath(); ctx.rect(x, y, w, h); stroke(); return g; },
     poly(pts, close) {
       setStyle(); ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
-      if (close) ctx.closePath(); ctx.stroke(); return g;
+      if (close) ctx.closePath(); stroke(); return g;
     },
     curve(pts) {   // smooth line through points
       setStyle(); ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
       if (pts.length === 3) {   // a bend that passes through the middle point
         const [a, b, c] = pts;
         ctx.quadraticCurveTo(2 * b[0] - (a[0] + c[0]) / 2, 2 * b[1] - (a[1] + c[1]) / 2, c[0], c[1]);
-        ctx.stroke(); return g;
+        stroke(); return g;
       }
       for (let i = 1; i < pts.length - 1; i++) {
         ctx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
       }
-      const l = pts[pts.length - 1]; ctx.lineTo(l[0], l[1]); ctx.stroke(); return g;
+      const l = pts[pts.length - 1]; ctx.lineTo(l[0], l[1]); stroke(); return g;
     },
     dot(x, y, color = 'rgba(230, 50, 60, .95)', r = 5) {
       if (past) return g;
@@ -49,8 +50,8 @@ M.makeG = function (ctx, u) {
     text(s, x, y, align = 'left') {
       if (past) return g;
       ctx.save(); ctx.setLineDash([]); ctx.font = `${12 * u}px Segoe UI, sans-serif`;
-      ctx.fillStyle = style === NOW ? 'rgba(200, 95, 0, .95)' : 'rgba(80, 130, 190, .8)';
-      ctx.textAlign = align; ctx.fillText(s, x, y); ctx.restore(); return g;
+      ctx.fillStyle = style === NOW ? 'rgba(255, 170, 60, 1)' : 'rgba(150, 210, 255, .95)';
+      ctx.textAlign = align; ctx.lineWidth = 3 * u; ctx.strokeStyle = 'rgba(14, 8, 34, .75)'; ctx.strokeText(s, x, y); ctx.fillText(s, x, y); ctx.restore(); return g;
     },
     rays(vp, n, len) {   // perspective fan around a vanishing point
       g.ref();

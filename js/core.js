@@ -50,6 +50,17 @@ App.util = {
 App.on = function (evt, fn) { (this._handlers[evt] ||= []).push(fn); };
 App.emit = function (evt, data) { (this._handlers[evt] || []).forEach(fn => fn(data)); };
 
+/* Stroke the current path with a thin dark outline under it, so guide lines
+   stay visible on any color (white paper, pink sky, neon, night). */
+App.haloStroke = function (ctx, strength = 0.75) {
+  ctx.save();
+  ctx.strokeStyle = `rgba(14, 8, 34, ${strength})`;
+  ctx.lineWidth = ctx.lineWidth + 3 * App.viewPx();
+  ctx.stroke();
+  ctx.restore();
+  ctx.stroke();
+};
+
 /* ---------- document ---------- */
 App.initDocument = function () {
   const wrap = document.getElementById('canvasWrap');

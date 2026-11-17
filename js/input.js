@@ -256,8 +256,8 @@
       const a = ghostAge < 900 ? 0.75 : 0.75 * (1 - (ghostAge - 900) / 1300);
       c.save();
       c.strokeStyle = `rgba(235, 70, 90, ${a})`; c.lineWidth = 1.6 * u; c.setLineDash([7 * u, 5 * u]);
-      App.Shapes.geomPath(c, ghost.res.geom); c.stroke();
-      if (st.mirror) { c.translate(2 * App.mirrorAxis(), 0); c.scale(-1, 1); App.Shapes.geomPath(c, ghost.res.geom); c.stroke(); }
+      App.Shapes.geomPath(c, ghost.res.geom); App.haloStroke(c, 0.6 * a);
+      if (st.mirror) { c.translate(2 * App.mirrorAxis(), 0); c.scale(-1, 1); App.Shapes.geomPath(c, ghost.res.geom); App.haloStroke(c, 0.6 * a); }
       c.restore();
     }
     App.Items.drawFlash(c, performance.now());

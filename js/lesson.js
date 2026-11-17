@@ -205,7 +205,8 @@
     const g = M.makeG(ctx, App.viewPx());
     // earlier steps stay visible as faint blue guides, so you never lose your place
     g.past(true);
-    for (let k = 0; k < L.i; k++) { const p = L.method.steps[k]; if (p.hint) { ctx.save(); p.hint(g, L.A); ctx.restore(); } }
+    for (let k = 0; k < L.i; k++) { const p = L.method.steps[k]; if (p.hint && !p.hintOnce) {   // hintOnce: instructions, not construction lines
+      ctx.save(); p.hint(g, L.A); ctx.restore(); } }
     g.past(false).now();
     if (s.hint) s.hint(g, L.A);
     ctx.restore();

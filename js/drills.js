@@ -219,15 +219,15 @@
     if (!run || !run.target) return;
     const t = run.target;
     c.save();
-    c.strokeStyle = 'rgba(70, 140, 220, 0.75)'; c.lineWidth = 2.5 * u; c.setLineDash([10 * u, 7 * u]);
+    c.strokeStyle = 'rgba(90, 200, 255, 1)'; c.lineWidth = 2.5 * u; c.setLineDash([10 * u, 7 * u]);
     if (t.A) {
       c.fillStyle = 'rgba(230, 50, 60, .95)';
       for (const p of [t.A, t.B]) { c.beginPath(); c.arc(p.x, p.y, 7 * u, 0, Math.PI * 2); c.fill(); }
     } else if (t.e) {
-      c.beginPath(); c.ellipse(t.e.cx, t.e.cy, t.e.a, t.e.b, t.e.angle, 0, Math.PI * 2); c.stroke();
+      c.beginPath(); c.ellipse(t.e.cx, t.e.cy, t.e.a, t.e.b, t.e.angle, 0, Math.PI * 2); App.haloStroke(c);
     } else if (t.P) {
       const P = t.P;
-      c.beginPath(); c.moveTo(P[0].x, P[0].y); c.bezierCurveTo(P[1].x, P[1].y, P[2].x, P[2].y, P[3].x, P[3].y); c.stroke();
+      c.beginPath(); c.moveTo(P[0].x, P[0].y); c.bezierCurveTo(P[1].x, P[1].y, P[2].x, P[2].y, P[3].x, P[3].y); App.haloStroke(c);
       c.setLineDash([]); c.fillStyle = 'rgba(70, 140, 220, 0.9)';
       c.beginPath(); c.arc(P[0].x, P[0].y, 6 * u, 0, Math.PI * 2); c.fill();
     }
